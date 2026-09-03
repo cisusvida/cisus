@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2a1c10"/><stop offset="1" stop-color="#3f2c18"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="300" y1="300" x2="900" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#b07d44"/><stop offset="0.5" stop-color="#8a5a2b"/><stop offset="1" stop-color="#6d4420"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="600" cy="450" r="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f4b860" stop-opacity="0.2"/><stop offset="1" stop-color="#f4b860" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect width="1200" height="900" fill="url(#glow)"/>
+  <text x="600" y="140" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="32" letter-spacing="10" fill="#e7c79a" opacity="0.7">RELIEVE · LAGO RANCO</text>
+  <!-- board -->
+  <g>
+    <rect x="270" y="250" width="660" height="420" rx="60" fill="url(#wood)" stroke="#3f2c18" stroke-width="4"/>
+    <circle cx="330" cy="310" r="16" fill="#3f2c18" opacity="0.55"/>
+    <!-- wood grain -->
+    <g stroke="#5e3c1d" stroke-width="3" opacity="0.35" fill="none">
+      <path d="M300 350 q300 -30 600 0"/>
+      <path d="M300 600 q300 30 600 0"/>
+    </g>
+    <!-- engraved mountains + lake -->
+    <g stroke="#2a1c10" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" fill="none" opacity="0.8">
+      <path d="M360 520 L470 380 L545 470 L635 350 L735 500"/>
+      <path d="M735 500 L840 500" />
+      <path d="M360 520 L840 520" stroke="#1d6f48" stroke-width="9"/>
+      <path d="M400 555 h120 M560 555 h150" stroke="#1d6f48" stroke-width="6" opacity="0.7"/>
+    </g>
+  </g>
+</svg>

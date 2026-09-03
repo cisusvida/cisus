@@ -1,0 +1,32 @@
+{
+  "name": "cisus",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Plataforma Angular multiempresa para la comercialización de productos Cisus.",
+  "scripts": {
+    "start": "npm run frontend",
+    "dev": "npm start",
+    "dev:local": "npm start",
+    "frontend": "npm --prefix cisus-angular start",
+    "build": "npm run build:angular && npm run build:functions",
+    "build:angular": "npm --prefix cisus-angular run build",
+    "build:functions": "npm --prefix functions run build",
+    "test": "npm run test:angular && npm run test:functions",
+    "test:angular": "npm --prefix cisus-angular test -- --watch=false",
+    "test:functions": "npm --prefix functions test",
+    "verify:security": "node scripts/check-multitenant-security.cjs",
+    "verify": "npm run build:angular && npm run test:angular && npm run test:functions && npm run verify:security",
+    "bootstrap": "node scripts/bootstrap-cisus.cjs",
+    "deploy": "npm run build && firebase deploy",
+    "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes,storage",
+    "deploy:functions": "npm run build:functions && firebase deploy --only functions",
+    "deploy:hosting": "npm run build:angular && firebase deploy --only hosting"
+  },
+  "devDependencies": {
+    "firebase-admin": "^14.3.0",
+    "firebase-tools": "^15.0.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

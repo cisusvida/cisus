@@ -1,0 +1,73 @@
+<section id="contacto" aria-labelledby="contact-title">
+  <div class="container contact-grid">
+    <div class="contact-copy">
+      <p class="eyebrow">Conversemos</p>
+      <h2 id="contact-title" class="section-title">¿Tienes una idea<br />en <em>mente?</em></h2>
+      <p>
+        Cuéntanos lo que imaginas. Te ayudaremos a encontrar la mejor manera de hacerlo realidad.
+      </p>
+      <div class="contact-data">
+        <a href="mailto:hola@cisus.cl">hola&#64;cisus.cl <span>↗</span></a
+        ><span>Santiago, Chile</span>
+      </div>
+    </div>
+    <form class="contact-form" (submit)="onSubmit(); $event.preventDefault()" novalidate>
+      <div class="field">
+        <label for="contact-name">Nombre</label
+        ><input
+          id="contact-name"
+          autocomplete="name"
+          placeholder="Tu nombre"
+          [formField]="contactForm.name"
+        />
+        @if (contactForm.name().touched() && contactForm.name().errors().length) {
+          <span class="field-error">{{ contactForm.name().errors()[0].message }}</span>
+        }
+      </div>
+      <div class="field">
+        <label for="contact-email">Email</label
+        ><input
+          id="contact-email"
+          type="email"
+          autocomplete="email"
+          placeholder="tu@email.com"
+          [formField]="contactForm.email"
+        />
+        @if (contactForm.email().touched() && contactForm.email().errors().length) {
+          <span class="field-error">{{ contactForm.email().errors()[0].message }}</span>
+        }
+      </div>
+      <div class="field">
+        <label for="contact-phone">Teléfono <small>(opcional)</small></label
+        ><input
+          id="contact-phone"
+          type="tel"
+          autocomplete="tel"
+          placeholder="+56 9 1234 5678"
+          [formField]="contactForm.phone"
+        />
+      </div>
+      <div class="field">
+        <label for="contact-message">Tu consulta</label
+        ><textarea
+          id="contact-message"
+          rows="5"
+          placeholder="Cuéntanos sobre tu idea, cantidades o fechas…"
+          [formField]="contactForm.message"
+        ></textarea>
+        @if (contactForm.message().touched() && contactForm.message().errors().length) {
+          <span class="field-error">{{ contactForm.message().errors()[0].message }}</span>
+        }
+      </div>
+      <button
+        class="button button--orange"
+        type="submit"
+        [disabled]="contactForm().invalid() || contactForm().submitting()"
+      >
+        {{ contactForm().submitting() ? 'Enviando…' : 'Enviar mensaje' }}
+        <span aria-hidden="true">→</span>
+      </button>
+      <p class="privacy">Al enviar aceptas que usemos tus datos para responder esta consulta.</p>
+    </form>
+  </div>
+</section>

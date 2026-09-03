@@ -1,0 +1,20 @@
+schemaVersion: judge.profile-registry/v1
+registryId: cisus-profiles-v1
+owner: cisus-platform-owner
+profiles:
+  - id: frontend-local
+    label: Angular local
+    rank: 0
+    gateIds: [angular-build, angular-test]
+  - id: functions-local
+    label: Functions local
+    rank: 0
+    gateIds: [functions-test]
+  - id: security
+    label: Seguridad multiempresa
+    rank: 1
+    gateIds: [functions-test, multitenant-security]
+  - id: full
+    label: Cisus completo sin emuladores
+    rank: 2
+    gateIds: [angular-build, angular-test, functions-test, multitenant-security]

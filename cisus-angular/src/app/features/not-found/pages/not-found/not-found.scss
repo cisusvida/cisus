@@ -1,0 +1,40 @@
+section {
+  position: relative;
+  display: grid;
+  min-height: calc(100svh - 76px);
+  overflow: hidden;
+  place-items: center;
+  padding: 40px 20px;
+  background: var(--forest);
+  color: #fff;
+  text-align: center;
+}
+section::before {
+  content: '404';
+  position: absolute;
+  color: rgba(255, 255, 255, 0.025);
+  font: 800 min(42vw, 520px)/1 'Manrope';
+}
+div {
+  position: relative;
+  z-index: 1;
+}
+div > span {
+  display: inline-grid;
+  width: 70px;
+  height: 70px;
+  margin-bottom: 27px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: var(--orange);
+  font-weight: 800;
+}
+h1 {
+  font-size: clamp(2.7rem, 7vw, 5.8rem);
+  line-height: 0.96;
+}
+div > p:not(.eyebrow) {
+  margin-bottom: 30px;
+  color: rgba(255, 255, 255, 0.6);
+}

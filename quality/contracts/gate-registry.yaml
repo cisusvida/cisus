@@ -1,0 +1,66 @@
+schemaVersion: judge.gate-registry/v1
+registryId: cisus-gates-v1
+owner: cisus-platform-owner
+gates:
+  - id: angular-build
+    order: 10
+    label: Angular build
+    command: { kind: npm, args: [--prefix, cisus-angular, run, build] }
+    profileMembership: [frontend-local, full]
+    prerequisites: []
+    producer: juez-portable#executeGate
+    fingerprintInputs: { roots: [cisus-angular/src, cisus-angular/public, cisus-angular/package.json], scope: null }
+    expectedEvidenceSchema: judge.run-manifest/v2
+    timeoutMs: 300000
+    retry: { maxAttempts: 1, retryOn: [] }
+    environment: { mode: any, capabilities: [] }
+    sideEffects: generated
+    costClass: low
+    owner: cisus-frontend-owner
+  - id: angular-test
+    order: 20
+    label: Angular tests
+    command: { kind: npm, args: [--prefix, cisus-angular, test, --, --watch=false] }
+    profileMembership: [frontend-local, full]
+    prerequisites: []
+    producer: juez-portable#executeGate
+    fingerprintInputs: { roots: [cisus-angular/src], scope: null }
+    expectedEvidenceSchema: judge.run-manifest/v2
+    timeoutMs: 300000
+    retry: { maxAttempts: 1, retryOn: [] }
+    environment: { mode: any, capabilities: [] }
+    sideEffects: generated
+    costClass: low
+    owner: cisus-frontend-owner
+  - id: functions-test
+    order: 30
+    label: Functions build and tests
+    command: { kind: npm, args: [--prefix, functions, test] }
+    profileMembership: [functions-local, security, full]
+    prerequisites: []
+    producer: juez-portable#executeGate
+    fingerprintInputs: { roots: [functions/src, functions/package.json], scope: null }
+    expectedEvidenceSchema: judge.run-manifest/v2
+    timeoutMs: 300000
+    retry: { maxAttempts: 1, retryOn: [] }
+    environment: { mode: any, capabilities: [] }
+    sideEffects: generated
+    costClass: low
+    owner: cisus-backend-owner
+  - id: multitenant-security
+    order: 40
+    label: Multi-tenant security contract
+    command: { kind: node, args: [scripts/check-multitenant-security.cjs] }
+    profileMembership: [security, full]
+    prerequisites: []
+    producer: scripts/check-multitenant-security.cjs
+    fingerprintInputs:
+      roots: [functions/src, cisus-angular/src/app/core, cisus-angular/public/runtime-config.js, firestore.rules, storage.rules, firebase.json]
+      scope: null
+    expectedEvidenceSchema: judge.run-manifest/v2
+    timeoutMs: 30000
+    retry: { maxAttempts: 1, retryOn: [] }
+    environment: { mode: any, capabilities: [] }
+    sideEffects: none
+    costClass: negligible
+    owner: cisus-security-owner

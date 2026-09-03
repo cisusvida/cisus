@@ -1,0 +1,66 @@
+<section class="auth-page" aria-labelledby="login-title">
+  <div class="auth-art">
+    <span class="art-orbit art-orbit--one"></span><span class="art-orbit art-orbit--two"></span>
+    <div>
+      <p>Vende. Controla. Crece.</p>
+      <strong>Tu empresa,<br /><em>en su contexto.</em></strong
+      ><small
+        >Opera inventario, compradores, ventas y promociones según tu empresa y sucursal.</small
+      >
+    </div>
+  </div>
+  <div class="auth-panel">
+    <div class="auth-box">
+      <a routerLink="/" class="back">← Volver al inicio</a>
+      <p class="eyebrow">Tu cuenta Cisus</p>
+      <h1 id="login-title">Bienvenido<br />de vuelta.</h1>
+      <p class="intro">Ingresa y selecciona la empresa o sucursal donde trabajarás.</p>
+      <button class="google" type="button" (click)="loginWithGoogle()">
+        <span>G</span> Continuar con Google
+      </button>
+      <div class="divider"><span>o ingresa con email</span></div>
+      <form (submit)="login(); $event.preventDefault()" novalidate>
+        <div class="field">
+          <label for="login-email">Email</label
+          ><input
+            id="login-email"
+            type="email"
+            autocomplete="email"
+            placeholder="tu@email.com"
+            [formField]="loginForm.email"
+          />
+          @if (loginForm.email().touched() && loginForm.email().errors().length) {
+            <span class="field-error">{{ loginForm.email().errors()[0].message }}</span>
+          }
+        </div>
+        <div class="field">
+          <div class="label-row">
+            <label for="login-password">Contraseña</label
+            ><a href="mailto:soporte@cisus.cl">¿La olvidaste?</a>
+          </div>
+          <input
+            id="login-password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+            [formField]="loginForm.password"
+          />
+          @if (loginForm.password().touched() && loginForm.password().errors().length) {
+            <span class="field-error">{{ loginForm.password().errors()[0].message }}</span>
+          }
+        </div>
+        @if (errorMessage()) {
+          <p class="form-error" role="alert">{{ errorMessage() }}</p>
+        }
+        <button
+          class="button button--orange"
+          type="submit"
+          [disabled]="loginForm().invalid() || loginForm().submitting()"
+        >
+          {{ loginForm().submitting() ? 'Ingresando…' : 'Iniciar sesión' }} →
+        </button>
+      </form>
+      <p class="switch">¿Aún no tienes cuenta? <a routerLink="/register">Crear una cuenta</a></p>
+    </div>
+  </div>
+</section>

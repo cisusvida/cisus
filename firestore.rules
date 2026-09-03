@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function hasScopedToken() {
+      return isAuthenticated()
+        && request.auth.token.pv is int
+        && request.auth.token.sv is int
+        && request.auth.token.cid is string
+        && request.auth.token.entityId is string
+        && request.auth.token.jobRoleId is string
+        && request.auth.token.scopeId is string
+        && request.auth.token.scopeLevel in ['company', 'branch']
+        && request.auth.token.permissions is list;
+    }
+
+    function permissionStatePath() {
+      return /databases/$(database)/documents/user_permission_state/$(request.auth.uid);
+    }
+
+    function subscriptionPath() {
+      return /databases/$(database)/documents/subscription_entitlements/$(request.auth.token.cid);
+    }
+
+    function projectionPath() {
+      return /databases/$(database)/documents/scoped_user_permissions/$(request.auth.token.scopeId);
+    }
+
+    function hasFreshScopedContext() {
+      let permissionState = get(permissionStatePath());
+      let subscription = get(subscriptionPath());
+      let projection = get(projectionPath());
+      return hasScopedToken()
+        && permissionState.exists
+        && permissionState.data.permissionVersionNonce == request.auth.token.pv
+        && subscription.exists
+        && subscription.data.subscriptionVersionNonce == request.auth.token.sv
+        && subscription.data.status in ['active', 'trialing']
+        && projection.exists
+        && projection.data.uid == request.auth.uid
+        && projection.data.companyId == request.auth.token.cid
+        && projection.data.entityId == request.auth.token.entityId
+        && projection.data.jobRoleId == request.auth.token.jobRoleId
+        && projection.data.status == 'active';
+    }
+
+    function hasPermission(permission) {
+      return hasFreshScopedContext() && permission in request.auth.token.permissions;
+    }
+
+    function isResourceInActiveCompany(resourceData) {
+      return resourceData.companyId == request.auth.token.cid;
+    }
+
+    function isResourceInActiveBranch(resourceData) {
+      return request.auth.token.scopeLevel == 'company'
+        || resourceData.branchId == request.auth.token.entityId;
+    }
+
+    // Único read model directo: contiene solo rutas de imágenes ya visibles en la portada.
+    // App Check se exige a Firestore a nivel de servicio; ninguna escritura sale del backend.
+    match /public_site_content/home {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // El resto de Firestore es backend-owned. El catálogo y toda operación tenant
+    // pasan por Cloud Functions con App Check y autorización granular.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

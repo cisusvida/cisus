@@ -1,0 +1,18 @@
+<div class="toast-stack" aria-live="polite" aria-atomic="true">
+  @for (message of toast.messages(); track message.id) {
+    <div
+      class="toast"
+      [class.toast--error]="message.tone === 'error'"
+      [class.toast--info]="message.tone === 'info'"
+    >
+      <span class="toast-icon">{{ message.tone === 'error' ? '!' : '✓' }}</span>
+      <div>
+        <strong>{{ message.title }}</strong>
+        <p>{{ message.message }}</p>
+      </div>
+      <button type="button" aria-label="Cerrar notificación" (click)="toast.dismiss(message.id)">
+        ×
+      </button>
+    </div>
+  }
+</div>

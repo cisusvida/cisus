@@ -1,0 +1,11 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Todas las escrituras y lecturas SDK son backend-only. Las imágenes visibles
+    // sin login usan URLs v4 temporales emitidas por una Function con App Check;
+    // ni siquiera los prefijos public-media se abren al cliente.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

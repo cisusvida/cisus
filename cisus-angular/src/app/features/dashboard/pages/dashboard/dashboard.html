@@ -1,0 +1,413 @@
+<main class="workspace-shell">
+  <header class="workspace-header">
+    <div class="container header-row">
+      <div>
+        <a routerLink="/cuenta" class="back">← Cambiar empresa</a>
+        <p class="eyebrow">Operación Cisus</p>
+        <h1>{{ workspace()?.company?.name || 'Empresa asociada' }}</h1>
+      </div>
+      @if (workspace(); as current) {
+        <label>
+          Sucursal
+          <select [value]="branchId()" (change)="changeBranch($event)">
+            @for (unit of current.units; track unit.id) {
+              @if (unit.type === 'branch') {
+                <option [value]="unit.id">{{ unit.name }}</option>
+              }
+            }
+          </select>
+        </label>
+      }
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Áreas de operación">
+    <div class="container">
+      <button type="button" [class.active]="tab() === 'overview'" (click)="tab.set('overview')">
+        Resumen
+      </button>
+      @if (can('inventory.read')) {
+        <button type="button" [class.active]="tab() === 'inventory'" (click)="tab.set('inventory')">
+          Inventario
+        </button>
+      }
+      @if (can('sales.read')) {
+        <button type="button" [class.active]="tab() === 'sales'" (click)="tab.set('sales')">
+          Ventas
+        </button>
+      }
+      @if (can('customers.create')) {
+        <button type="button" [class.active]="tab() === 'customers'" (click)="tab.set('customers')">
+          Compradores
+        </button>
+      }
+      @if (
+        auth.activeContext()?.scopeLevel === 'company' &&
+        (can('branches.manage') ||
+          can('access_contracts.manage') ||
+          can('pricing.manage') ||
+          can('promotions.manage') ||
+          can('catalog.manage'))
+      ) {
+        <button
+          type="button"
+          [class.active]="tab() === 'administration'"
+          (click)="tab.set('administration')"
+        >
+          Administración
+        </button>
+      }
+    </div>
+  </nav>
+
+  <div class="container workspace-content">
+    @if (loading()) {
+      <p class="state" aria-live="polite">Cargando contexto seguro…</p>
+    } @else if (error()) {
+      <p class="state" role="alert">{{ error() }}</p>
+    } @else {
+      @switch (tab()) {
+        @case ('overview') {
+          <section class="metric-grid" aria-label="Resumen de operación">
+            <article>
+              <span>Productos habilitados</span><strong>{{ catalog().length }}</strong>
+            </article>
+            <article>
+              <span>Unidades en stock</span><strong>{{ stockUnits() }}</strong>
+            </article>
+            <article>
+              <span>Ventas visibles</span><strong>{{ sales().length }}</strong>
+            </article>
+            <article>
+              <span>Total vendido</span><strong>{{ price(salesTotal()) }}</strong>
+            </article>
+          </section>
+          @if (workspace(); as current) {
+            <section class="panel">
+              <p class="eyebrow">Acuerdo activo</p>
+              <h2>{{ current.agreement.pricingAuthority }}</h2>
+              <p>Modelos: {{ current.agreement.commercialModels.join(' · ') }}</p>
+              <p>Plan: {{ current.subscription.planId }} · {{ current.subscription.status }}</p>
+            </section>
+          }
+        }
+        @case ('inventory') {
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Sucursal</p>
+                <h2>Inventario</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>SKU</th>
+                    <th>Disponible</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of inventory(); track row.id) {
+                    <tr>
+                      <td>{{ productName(row.productId) }}</td>
+                      <td>{{ productSku(row.productId) }}</td>
+                      <td>{{ row.quantity }}</td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="3">Aún no hay stock registrado.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+          @if (can('inventory.receive')) {
+            <form
+              class="panel operation-form"
+              (submit)="receiveInventory(); $event.preventDefault()"
+            >
+              <h2>Recibir stock</h2>
+              <label
+                >Producto<select [formField]="receiptForm.productId">
+                  <option value="">Selecciona</option>
+                  @for (product of catalog(); track product.id) {
+                    <option [value]="product.id">{{ product.name }}</option>
+                  }
+                </select></label
+              >
+              <label>Cantidad<input type="number" [formField]="receiptForm.quantity" /></label>
+              <label>Origen o motivo<input type="text" [formField]="receiptForm.reason" /></label>
+              <button class="button button--orange" type="submit">Registrar recepción</button>
+            </form>
+          }
+        }
+        @case ('sales') {
+          @if (can('sales.create')) {
+            <form class="panel operation-form" (submit)="createSale(); $event.preventDefault()">
+              <h2>Nueva venta</h2>
+              <label
+                >Producto<select [formField]="saleForm.productId">
+                  <option value="">Selecciona</option>
+                  @for (product of catalog(); track product.id) {
+                    <option [value]="product.id">{{ product.name }}</option>
+                  }
+                </select></label
+              >
+              <label>Cantidad<input type="number" [formField]="saleForm.quantity" /></label>
+              <label
+                >ID comprador (opcional)<input type="text" [formField]="saleForm.customerId"
+              /></label>
+              <button class="button button--orange" type="submit">Confirmar venta</button>
+            </form>
+          }
+          <section class="panel">
+            <h2>Ventas recientes</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Venta</th>
+                    <th>Estado</th>
+                    <th>Total</th>
+                    <th>Comisión</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (sale of sales(); track sale.id) {
+                    <tr>
+                      <td>{{ sale.id }}</td>
+                      <td>{{ sale.status }}</td>
+                      <td>{{ price(sale.total, sale.currency) }}</td>
+                      <td>{{ price(sale.commissionTotal, sale.currency) }}</td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="4">Aún no hay ventas visibles.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+        }
+        @case ('customers') {
+          <form class="panel operation-form" (submit)="createCustomer(); $event.preventDefault()">
+            <p class="eyebrow">Identidad comercial</p>
+            <h2>Registrar comprador</h2>
+            <p>
+              El RUT y teléfono son opcionales y nunca se usan para iniciar sesión ni definir
+              permisos.
+            </p>
+            <label>Nombre<input type="text" [formField]="customerForm.fullName" /></label>
+            <label
+              >RUT opcional<input type="text" inputmode="text" [formField]="customerForm.rut"
+            /></label>
+            <label>Teléfono opcional<input type="tel" [formField]="customerForm.phone" /></label>
+            <label>Email opcional<input type="email" [formField]="customerForm.email" /></label>
+            <button class="button button--orange" type="submit">Guardar comprador</button>
+          </form>
+        }
+        @case ('administration') {
+          <section class="admin-grid">
+            @if (can('catalog.manage')) {
+              <section class="panel operation-form" aria-labelledby="public-media-title">
+                <p class="eyebrow">Medios protegidos</p>
+                <h2 id="public-media-title">Imágenes públicas</h2>
+                <p>Se convierten a WebP, se versionan y permanecen privadas en Storage.</p>
+                <label
+                  >Portada principal<input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    [disabled]="mediaUploading()"
+                    (change)="uploadMedia($event, 'home', 'hero')"
+                /></label>
+                <label
+                  >Producto<select [value]="mediaProductId()" (change)="updateMediaProduct($event)">
+                    <option value="">Selecciona</option>
+                    @for (product of catalog(); track product.id) {
+                      <option [value]="product.id">{{ product.name }}</option>
+                    }
+                  </select></label
+                >
+                <label
+                  >Imagen del producto<input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    [disabled]="mediaUploading() || !mediaProductId()"
+                    (change)="uploadMedia($event, 'product', mediaProductId())"
+                /></label>
+                @if (mediaUploading()) {
+                  <p aria-live="polite">Procesando y publicando imagen…</p>
+                }
+              </section>
+            }
+            @if (can('branches.manage')) {
+              <form class="panel operation-form" (submit)="createBranch(); $event.preventDefault()">
+                <p class="eyebrow">Estructura multiempresa</p>
+                <h2>Crear o actualizar sucursal</h2>
+                <label
+                  >ID estable<input
+                    type="text"
+                    [formField]="branchForm.branchId"
+                    placeholder="sucursal_centro"
+                /></label>
+                <label>Nombre<input type="text" [formField]="branchForm.name" /></label>
+                <button class="button button--orange" type="submit">Guardar sucursal</button>
+              </form>
+            }
+            @if (can('access_contracts.manage')) {
+              <form class="panel operation-form" (submit)="assignAccess(); $event.preventDefault()">
+                <p class="eyebrow">Roles y cupos nominativos</p>
+                <h2>Asignar acceso</h2>
+                <label>UID Firebase<input type="text" [formField]="accessForm.targetUid" /></label>
+                <label
+                  >Empresa o sucursal<select [formField]="accessForm.entityId">
+                    <option value="">Selecciona</option>
+                    @for (unit of workspace()?.units || []; track unit.id) {
+                      <option [value]="unit.id">{{ unit.name }} · {{ unit.type }}</option>
+                    }
+                  </select></label
+                >
+                <label
+                  >Rol<select [formField]="accessForm.jobRoleId">
+                    <option value="company_admin">Administrador empresa</option>
+                    <option value="branch_manager">Jefe sucursal</option>
+                    <option value="sales_associate">Ventas</option>
+                    <option value="inventory_operator">Inventario</option>
+                    <option value="finance_viewer">Finanzas</option>
+                  </select></label
+                >
+                <button class="button button--orange" type="submit">Asignar acceso</button>
+              </form>
+            }
+            @if (can('pricing.manage')) {
+              <form class="panel operation-form" (submit)="saveOffer(); $event.preventDefault()">
+                <p class="eyebrow">Modelo mixto</p>
+                <h2>Precio por empresa</h2>
+                <label
+                  >Producto<select [formField]="offerForm.productId">
+                    <option value="">Selecciona</option>
+                    @for (product of catalog(); track product.id) {
+                      <option [value]="product.id">{{ product.name }}</option>
+                    }
+                  </select></label
+                >
+                <label
+                  >Modelo<select [formField]="offerForm.commercialModel">
+                    <option value="wholesale">Mayorista</option>
+                    <option value="consignment">Consignación</option>
+                    <option value="commission">Comisión</option>
+                  </select></label
+                >
+                <label>Precio fijo<input type="number" [formField]="offerForm.fixedPrice" /></label>
+                <label>Mínimo<input type="number" [formField]="offerForm.minPrice" /></label>
+                <label>Máximo<input type="number" [formField]="offerForm.maxPrice" /></label>
+                <label
+                  >Comisión %<input type="number" [formField]="offerForm.commissionRate"
+                /></label>
+                <button class="button button--orange" type="submit">Guardar condiciones</button>
+              </form>
+            }
+            @if (
+              can('promotions.manage') &&
+              workspace()?.subscription?.entitlements?.includes('margin_promotions')
+            ) {
+              <form
+                class="panel operation-form"
+                (submit)="createPromotion(); $event.preventDefault()"
+              >
+                <p class="eyebrow">Mayor margen</p>
+                <h2>Nueva promoción</h2>
+                <label>Nombre<input type="text" [formField]="promotionForm.name" /></label>
+                <label
+                  >Producto<select [formField]="promotionForm.productId">
+                    <option value="">Todos</option>
+                    @for (product of catalog(); track product.id) {
+                      <option [value]="product.id">{{ product.name }}</option>
+                    }
+                  </select></label
+                >
+                <label
+                  >Descuento comprador %<input
+                    type="number"
+                    [formField]="promotionForm.discountPercent"
+                /></label>
+                <label
+                  >Bono margen empresa %<input
+                    type="number"
+                    [formField]="promotionForm.marginBonusRate"
+                /></label>
+                <button class="button button--orange" type="submit">Activar promoción</button>
+              </form>
+            }
+          </section>
+          @if (can('access_contracts.read')) {
+            <section class="panel">
+              <h2>Accesos vigentes</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Usuario</th>
+                      <th>Unidad</th>
+                      <th>Rol</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (contract of accessContracts(); track contract.id) {
+                      <tr>
+                        <td>{{ contract.uid }}</td>
+                        <td>{{ contract.scopeUnitId }}</td>
+                        <td>{{ contract.jobRoleId }}</td>
+                        <td>{{ contract.status }}</td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="4">No hay contratos visibles.</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          }
+          @if (can('promotions.read')) {
+            <section class="panel">
+              <h2>Promociones</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Descuento</th>
+                      <th>Bono margen</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (promotion of promotions(); track promotion.id) {
+                      <tr>
+                        <td>{{ promotion.name }}</td>
+                        <td>{{ promotion.discountPercent }}%</td>
+                        <td>{{ promotion.marginBonusRate }}%</td>
+                        <td>{{ promotion.status }}</td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="4">No hay promociones.</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          }
+        }
+      }
+    }
+  </div>
+</main>

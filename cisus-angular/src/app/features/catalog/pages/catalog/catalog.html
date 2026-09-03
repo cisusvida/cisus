@@ -1,0 +1,95 @@
+<section class="catalog-hero">
+  <div class="container">
+    <a class="back" routerLink="/">← Volver al inicio</a>
+    <p class="eyebrow">Catálogo Cisus</p>
+    <h1>Productos creados por Cisus.<br /><em>Disponibles en empresas asociadas.</em></h1>
+    <p>El precio final y las promociones dependen de la empresa y sucursal donde compres.</p>
+  </div>
+</section>
+<main class="catalog-body" aria-labelledby="catalog-title">
+  <div class="container tools">
+    <h2 id="catalog-title" class="sr-only">Productos disponibles</h2>
+    <label class="search">
+      <span aria-hidden="true">⌕</span><span class="sr-only">Buscar productos</span>
+      <input
+        type="search"
+        placeholder="Buscar por nombre o SKU…"
+        [value]="query()"
+        (input)="updateQuery($event)"
+      />
+    </label>
+  </div>
+  @if (loading()) {
+    <p class="container empty" aria-live="polite">Cargando productos…</p>
+  } @else if (error()) {
+    <p class="container empty" role="alert">{{ error() }}</p>
+  } @else {
+    <div class="container result-count">
+      <span>{{ visibleItems().length }} productos</span><span>Precios referenciales Cisus</span>
+    </div>
+    <div class="container catalog-grid">
+      @for (item of visibleItems(); track item.id) {
+        <article class="catalog-card card">
+          <button
+            type="button"
+            class="card-image"
+            (click)="open(item)"
+            [attr.aria-label]="'Ver ' + item.name"
+          >
+            @if (item.imageUrl) {
+              <img
+                [ngSrc]="item.imageUrl"
+                fill
+                sizes="(max-width: 700px) 100vw, 33vw"
+                [alt]="item.name"
+              />
+            } @else {
+              <span class="empty-image">Cisus</span>
+            }
+          </button>
+          <div class="card-copy">
+            <div>
+              <small>{{ item.sku }}</small>
+              <h3>{{ item.name }}</h3>
+              <p>{{ item.description }}</p>
+            </div>
+            <div class="card-bottom">
+              <span
+                >Referencia <strong>{{ price(item.basePrice, item.currency) }}</strong></span
+              ><button type="button" (click)="open(item)" aria-label="Ver detalles">→</button>
+            </div>
+          </div>
+        </article>
+      } @empty {
+        <div class="empty">
+          <strong>No hay productos publicados.</strong>
+          <p>Vuelve a consultar pronto.</p>
+        </div>
+      }
+    </div>
+  }
+</main>
+<app-footer />
+@if (selected(); as item) {
+  <div class="modal-backdrop" (click)="close()">
+    <section
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="'catalog-modal-' + item.id"
+      (click)="$event.stopPropagation()"
+    >
+      <button class="close" type="button" aria-label="Cerrar" (click)="close()">×</button>
+      <div class="modal-content">
+        <p class="eyebrow">{{ item.sku }}</p>
+        <h2 [id]="'catalog-modal-' + item.id">{{ item.name }}</h2>
+        <p>{{ item.description }}</p>
+        <div class="quote">
+          <span>Precio referencial</span><strong>{{ price(item.basePrice, item.currency) }}</strong
+          ><small>Consulta disponibilidad y promociones en una empresa asociada.</small>
+        </div>
+        <a class="button button--orange" routerLink="/login">Ingresar como empresa asociada →</a>
+      </div>
+    </section>
+  </div>
+}

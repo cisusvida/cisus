@@ -1,0 +1,49 @@
+<a class="skip-link" href="#main-content">Saltar al contenido</a>
+<header class="site-header" [class.site-header--hero]="isHome()">
+  <div class="container header-inner">
+    <a routerLink="/" class="brand" aria-label="Cisus, inicio" (click)="closeMenu()">
+      <img
+        [ngSrc]="isHome() ? '/images/cisus-light.svg' : '/images/cisus.svg'"
+        width="180"
+        height="41"
+        priority
+        alt="Cisus"
+      />
+    </a>
+    <button
+      class="menu-button"
+      type="button"
+      [attr.aria-label]="menuOpen() ? 'Cerrar menú' : 'Abrir menú'"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="primary-navigation"
+      (click)="menuOpen.update((open) => !open)"
+    >
+      <span></span><span></span>
+    </button>
+    <nav
+      id="primary-navigation"
+      class="navigation"
+      [class.navigation--open]="menuOpen()"
+      aria-label="Navegación principal"
+    >
+      <a routerLink="/" fragment="proceso" (click)="closeMenu()">Proceso</a>
+      <a routerLink="/" fragment="portfolio" (click)="closeMenu()">Productos</a>
+      <a routerLink="/catalogo" routerLinkActive="active" (click)="closeMenu()">Catálogo</a>
+      <a routerLink="/" fragment="contacto" (click)="closeMenu()">Contacto</a>
+      <div class="nav-actions">
+        @if (auth.user(); as user) {
+          <a routerLink="/cuenta" class="account-link" (click)="closeMenu()"
+            ><span class="avatar">{{ auth.initials() }}</span
+            ><span>{{ user.name }}</span></a
+          >
+          <button type="button" class="logout" (click)="logout()">Salir</button>
+        } @else {
+          <div class="guest-actions">
+            <a routerLink="/login" class="login" (click)="closeMenu()">Ingresar</a>
+            <a routerLink="/register" class="register" (click)="closeMenu()">Registrarse</a>
+          </div>
+        }
+      </div>
+    </nav>
+  </div>
+</header>

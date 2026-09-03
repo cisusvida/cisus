@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0c2118"/><stop offset="1" stop-color="#143726"/>
+    </linearGradient>
+    <linearGradient id="kraft" x1="430" y1="430" x2="770" y2="730" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#cda06a"/><stop offset="1" stop-color="#9c7038"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="600" cy="430" r="380" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2ea667" stop-opacity="0.28"/><stop offset="1" stop-color="#2ea667" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect width="1200" height="900" fill="url(#glow)"/>
+  <text x="600" y="150" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" letter-spacing="12" fill="#9fe6c0" opacity="0.75">ECO · 100% RECICLABLE</text>
+  <!-- box -->
+  <g stroke="#0c2118" stroke-width="3" stroke-linejoin="round">
+    <path d="M600 360 L780 455 L600 550 L420 455 Z" fill="#e0bd8c"/>
+    <path d="M420 455 L600 550 L600 745 L420 650 Z" fill="#9c7038"/>
+    <path d="M780 455 L600 550 L600 745 L780 650 Z" fill="url(#kraft)"/>
+  </g>
+  <path d="M500 408 L600 455 L700 408" fill="none" stroke="#7a5526" stroke-width="6" stroke-linejoin="round"/>
+  <!-- leaf -->
+  <g>
+    <path d="M600 300 C 510 300, 470 210, 600 140 C 730 210, 690 300, 600 300 Z" fill="#2ea667"/>
+    <path d="M600 150 V 296" stroke="#0c2118" stroke-width="6" stroke-linecap="round" opacity="0.5"/>
+    <path d="M600 200 l40 -22 M600 235 l-44 -24 M600 270 l40 -22" stroke="#0c2118" stroke-width="5" stroke-linecap="round" opacity="0.4"/>
+  </g>
+  <circle cx="600" cy="300" r="9" fill="#9c7038"/>
+</svg>

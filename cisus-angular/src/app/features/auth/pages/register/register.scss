@@ -1,0 +1,32 @@
+@use '../login/login';
+.auth-panel {
+  padding-block: 35px;
+}
+.back {
+  margin-bottom: 26px;
+}
+.password-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.terms {
+  display: flex;
+  gap: 10px;
+  align-items: start;
+  color: #697169;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  cursor: pointer;
+}
+.terms input {
+  width: 17px;
+  height: 17px;
+  margin-top: 1px;
+  accent-color: var(--orange);
+}
+@media (max-width: 480px) {
+  .password-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#101a30"/><stop offset="1" stop-color="#1c2b4a"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="420" y1="300" x2="780" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f7d488"/><stop offset="1" stop-color="#c9962f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="600" cy="430" r="380" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f4b860" stop-opacity="0.18"/><stop offset="1" stop-color="#f4b860" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect width="1200" height="900" fill="url(#glow)"/>
+  <text x="600" y="150" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" letter-spacing="14" fill="#f4d9a0" opacity="0.7">PREMIUM</text>
+  <!-- isometric box -->
+  <g stroke="#0d1424" stroke-width="3" stroke-linejoin="round">
+    <path d="M600 320 L790 430 L600 540 L410 430 Z" fill="url(#gold)"/>
+    <path d="M410 430 L600 540 L600 720 L410 610 Z" fill="#b07f25"/>
+    <path d="M790 430 L600 540 L600 720 L790 610 Z" fill="#d9a843"/>
+  </g>
+  <!-- ribbon -->
+  <g stroke="#101a30" stroke-width="3">
+    <path d="M600 320 L600 720" stroke="#f7e4b5" stroke-width="14"/>
+    <path d="M505 375 L600 430 L695 375" fill="none" stroke="#f7e4b5" stroke-width="10" stroke-linejoin="round"/>
+  </g>
+  <path d="M600 320 c-46 -54 -120 -44 -116 6 4 40 78 36 116 -6 38 42 112 46 116 6 4 -50 -70 -60 -116 -6Z" fill="#f7e4b5" stroke="#caa44e" stroke-width="3"/>
+  <circle cx="600" cy="322" r="14" fill="#caa44e"/>
+</svg>

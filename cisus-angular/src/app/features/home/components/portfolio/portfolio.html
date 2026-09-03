@@ -1,0 +1,89 @@
+<section id="portfolio" aria-labelledby="portfolio-title">
+  <div class="container portfolio-head">
+    <div>
+      <p class="eyebrow">Líneas seleccionadas</p>
+      <h2 id="portfolio-title" class="section-title">
+        Productos que acompañan<br />buenos <em>momentos.</em>
+      </h2>
+    </div>
+    <div class="head-side">
+      <p class="section-copy">
+        Diseño Cisus, fabricación trazable y disponibilidad administrada por cada empresa asociada.
+      </p>
+      <a routerLink="/catalogo">Ver todo el catálogo <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+  <div class="container portfolio-grid">
+    @for (item of items(); track item.id; let index = $index) {
+      <button
+        type="button"
+        class="project"
+        [class.project--wide]="index === 0"
+        (click)="open(item, $event)"
+        [attr.aria-label]="'Ver detalles de ' + item.title"
+      >
+        <img
+          [ngSrc]="item.cover"
+          fill
+          [priority]="index === 0"
+          sizes="(max-width: 760px) 100vw, 55vw"
+          [alt]="item.title"
+        />
+        <span class="project-shade"></span>
+        <span class="project-number">0{{ index + 1 }}</span>
+        <span class="project-content"
+          ><small>{{ item.category }}</small
+          ><strong>{{ item.title }}</strong
+          ><span>{{ item.summary }}</span></span
+        >
+        <span class="project-arrow" aria-hidden="true">↗</span>
+      </button>
+    }
+  </div>
+</section>
+@if (selected(); as item) {
+  <div class="modal-backdrop" role="presentation" (click)="close()">
+    <section
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="'modal-' + item.id"
+      (click)="$event.stopPropagation()"
+    >
+      <button
+        #modalClose
+        type="button"
+        class="modal-close"
+        aria-label="Cerrar detalle"
+        (click)="close()"
+      >
+        ×
+      </button>
+      <div class="modal-image">
+        <img [ngSrc]="item.cover" fill sizes="(max-width: 700px) 100vw, 50vw" [alt]="item.title" />
+      </div>
+      <div class="modal-copy">
+        <p class="eyebrow">{{ item.category }}</p>
+        <h3 [id]="'modal-' + item.id">{{ item.title }}</h3>
+        <p>{{ item.description }}</p>
+        <div class="chips">
+          @for (tag of item.tags; track tag) {
+            <span class="chip">{{ tag }}</span>
+          }
+        </div>
+        <h4>Incluye</h4>
+        <ul>
+          @for (deliverable of item.deliverables; track deliverable) {
+            <li>{{ deliverable }}</li>
+          }
+        </ul>
+        <div class="modal-price">
+          <span>Desde</span><strong>{{ price(item.price) }}</strong>
+        </div>
+        <a class="button button--orange" routerLink="/catalogo" (click)="close()"
+          >Ver producto en catálogo</a
+        >
+      </div>
+    </section>
+  </div>
+}

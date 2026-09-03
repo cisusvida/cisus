@@ -1,0 +1,28 @@
+<section class="hero" aria-labelledby="hero-title">
+  <img
+    [ngSrc]="heroImageUrl()"
+    fill
+    priority
+    sizes="100vw"
+    alt="Tabla corporativa Cisus sobre una mesa de madera"
+  />
+  <div class="hero-overlay"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-content">
+    <p class="hero-kicker"><span></span> Diseño a medida · Producción para empresas</p>
+    <h1 id="hero-title">
+      <span>Productos que crean</span>
+      <em>identidad.</em>
+    </h1>
+    <p class="hero-copy">
+      Diseñamos y fabricamos productos personalizados para empresas, cuidando los materiales, las
+      terminaciones y cada detalle que representa a tu marca.
+    </p>
+    <div class="hero-actions">
+      <a class="button button--light" href="#contacto"
+        >Cuéntanos tu idea <span aria-hidden="true">↘</span></a
+      >
+      <a class="button button--outline" routerLink="/catalogo">Explorar catálogo</a>
+    </div>
+  </div>
+</section>

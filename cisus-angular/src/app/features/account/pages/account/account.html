@@ -1,0 +1,84 @@
+<section class="account-hero">
+  <div class="container hero-row">
+    <div>
+      <p class="eyebrow">Cuenta Cisus</p>
+      <h1>Hola, {{ auth.user()?.name }}.</h1>
+      <p>Selecciona la empresa y sucursal con la que trabajarás.</p>
+    </div>
+    @if (auth.contexts().length) {
+      <label class="role-select"
+        >Contexto activo<select
+          [value]="auth.activeContext()?.scopeId ?? ''"
+          (change)="switchContext($event)"
+        >
+          <option value="" disabled>Selecciona un contexto</option>
+          @for (context of auth.contexts(); track context.scopeId) {
+            <option [value]="context.scopeId">
+              {{ context.companyName }} · {{ context.entityName }} · {{ context.jobRoleId }}
+            </option>
+          }
+        </select></label
+      >
+    }
+  </div>
+</section>
+
+<main class="container projects-section" id="account-content">
+  @if (!auth.contexts().length) {
+    <section class="help-card" aria-labelledby="no-access-title">
+      <div>
+        <p class="eyebrow">Acceso pendiente</p>
+        <h2 id="no-access-title">Tu cuenta todavía no tiene un contrato activo.</h2>
+        <p>Un administrador de la empresa debe asignarte una sucursal y un rol.</p>
+      </div>
+    </section>
+  } @else if (!auth.hasActiveContext()) {
+    <p class="empty-state">Selecciona un contexto para comenzar.</p>
+  } @else if (loading()) {
+    <p class="empty-state" aria-live="polite">Cargando empresa…</p>
+  } @else if (error()) {
+    <p class="empty-state" role="alert">{{ error() }}</p>
+  } @else if (workspace(); as current) {
+    <div class="projects-head">
+      <div>
+        <p class="eyebrow">{{ current.company.name }}</p>
+        <h2>Operación comercial</h2>
+      </div>
+      <a class="button button--orange" routerLink="/dashboard">Abrir panel →</a>
+    </div>
+    <div class="projects-grid">
+      <article class="project-card card project-copy">
+        <p class="eyebrow">Suscripción</p>
+        <h3>{{ current.subscription.planId || 'Plan sin nombre' }}</h3>
+        <p>
+          Estado: {{ current.subscription.status }} · versión
+          {{ current.subscription.subscriptionVersionNonce }}
+        </p>
+        <strong>{{ current.subscription.limits.seats?.max || 0 }} cupos nominales</strong>
+      </article>
+      <article class="project-card card project-copy">
+        <p class="eyebrow">Acuerdo comercial</p>
+        <h3>{{ current.agreement.pricingAuthority }}</h3>
+        <p>{{ current.agreement.commercialModels.join(' · ') || 'Sin modelos configurados' }}</p>
+        <strong
+          >{{ current.agreement.currency }} · contrato v{{
+            current.agreement.contractVersion
+          }}</strong
+        >
+      </article>
+      <article class="project-card card project-copy">
+        <p class="eyebrow">Unidades visibles</p>
+        <h3>{{ current.units.length }}</h3>
+        <p>
+          @for (unit of current.units; track unit.id; let last = $last) {
+            {{ unit.name }}
+            @if (!last) {
+              ·
+            }
+          }
+        </p>
+      </article>
+    </div>
+  }
+</main>
+<app-footer />
