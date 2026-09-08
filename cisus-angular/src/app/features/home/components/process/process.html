@@ -18,15 +18,6 @@
       [selectedId]="activeIdeaId()"
       (selection)="selectIdea($event)"
     />
-    <div class="process-story-heading">
-      <span>{{ activeIdea().label }}</span>
-      <span class="process-story-heading__divider" aria-hidden="true"></span>
-      <span>{{
-        activeIdea().status === 'developing'
-          ? 'Una nueva idea en desarrollo'
-          : 'Del primer trazo al producto'
-      }}</span>
-    </div>
     <div
       class="steps-shell"
       role="region"

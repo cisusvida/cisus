@@ -61,27 +61,6 @@ section {
   left: max(0px, calc((100% - var(--step-width)) / 2 - 300px));
   width: 280px;
 }
-.process-story-heading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  min-height: 22px;
-  font-family: var(--font-brand);
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #a9b89d;
-  text-transform: uppercase;
-}
-.process-story-heading > span:first-child {
-  color: #eadcba;
-}
-.process-story-heading__divider {
-  width: 18px;
-  height: 1px;
-  background: #6c795f;
-}
 .steps-shell {
   position: relative;
   width: 100%;
@@ -415,11 +394,6 @@ h3 {
     --step-width: min(300px, calc(100vw - 64px));
     --step-height: 390px;
     margin-top: 30px;
-  }
-  .process-story-heading {
-    font-size: 0.57rem;
-    gap: 8px;
-    letter-spacing: 0.035em;
   }
   .step {
     min-height: var(--step-height);
