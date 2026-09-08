@@ -53,26 +53,4 @@
       </div>
     }
   </div>
-  <div class="orbit-navigation">
-    <button
-      type="button"
-      aria-label="Idea anterior"
-      [disabled]="ideas().length < 2"
-      (click)="move(-1)"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6" /></svg>
-    </button>
-    <span class="orbit-count" aria-live="polite"
-      >{{ selectedIndex() + 1 }} <span>/ {{ ideas().length }}</span></span
-    >
-    <button
-      type="button"
-      aria-label="Idea siguiente"
-      [disabled]="ideas().length < 2"
-      (click)="move(1)"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6" /></svg>
-    </button>
-  </div>
-  <p class="orbit-help">Gira o desliza para explorar</p>
 </div>

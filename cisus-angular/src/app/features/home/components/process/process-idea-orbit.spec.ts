@@ -43,13 +43,18 @@ describe('Process idea wheel', () => {
   });
 
   it('rotates, selects and wraps a future catalogue without hardcoded product positions', async () => {
-    button('Idea anterior').click();
+    button('Mostrar las etapas de Idea 1').focus();
+    document.activeElement?.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }),
+    );
     await fixture.whenStable();
     expect(fixture.componentInstance.selected()).toBe('idea-4');
     expect(
       button('Mostrar las etapas de Idea 5').closest('.orbit-arm')?.getAttribute('style'),
     ).toContain('180deg');
-    button('Idea siguiente').click();
+    document.activeElement?.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }),
+    );
     await fixture.whenStable();
     expect(fixture.componentInstance.selected()).toBe('idea-0');
     button('Mostrar las etapas de Idea 2').click();
@@ -72,6 +77,22 @@ describe('Process idea wheel', () => {
     expect(fixture.componentInstance.selected()).toBe('idea-3');
     expect(document.activeElement).toBe(button('Mostrar las etapas de Idea 4'));
     expect(button('Mostrar las etapas de Idea 1').disabled).toBe(true);
+  });
+
+  it('keeps the keyboard focus cue on the circular icon rather than framing the whole product', async () => {
+    button('Mostrar las etapas de Idea 1').focus();
+    await fixture.whenStable();
+    const focusRule = [...document.styleSheets]
+      .flatMap((sheet) => [...sheet.cssRules])
+      .find(
+        (rule): rule is CSSStyleRule =>
+          rule instanceof CSSStyleRule &&
+          rule.selectorText.includes('.orbit-choice') &&
+          rule.selectorText.includes(':focus-visible') &&
+          rule.style.outline === 'none',
+      );
+    expect(focusRule?.style.outline).toBe('none');
+    expect(focusRule?.style.boxShadow).toBe('none');
   });
 
   it('accepts one wheel detent per gesture and leaves browser zoom alone', async () => {
@@ -117,10 +138,13 @@ describe('Process idea wheel', () => {
     expect(dial.classList.contains('orbit-dial--dragging')).toBe(false);
   });
 
-  it('disables unnecessary navigation when there is only one idea', async () => {
+  it('renders no redundant navigation controls when there is only one idea', async () => {
     fixture.componentInstance.ideas.update((ideas) => ideas.slice(0, 1));
     await fixture.whenStable();
-    expect(button('Idea anterior').disabled).toBe(true);
-    expect(button('Idea siguiente').disabled).toBe(true);
+    expect(fixture.nativeElement.querySelector('.orbit-navigation')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.orbit-help')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Idea anterior"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Idea siguiente"]')).toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('.orbit-choice')).toHaveLength(1);
   });
 });

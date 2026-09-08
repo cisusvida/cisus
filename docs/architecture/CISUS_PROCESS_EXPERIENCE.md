@@ -16,7 +16,7 @@
 5. En pantallas de hasta 1050 px, el arco se dispone horizontalmente arriba del carrusel. El gesto horizontal del selector permite mantener el desplazamiento vertical de la página.
 6. El trazo fino de hover/foco sigue la silueta SVG de la tabla y **solo la base portavasos** en el icono de café, nunca la taza, el vapor ni el disco del botón. La idea seleccionada mantiene un acento más tenue.
 7. El brillo inferior de la tarjeta activa (`step-progress-glide`) y el borde de la última tarjeta (`final-border-orbit`) pertenecen al carrusel, no al selector. Con movimiento reducido conservan un acento estático.
-8. Las ideas fuera de la ventana visible no reciben foco ni interacción. Las flechas de teclado trasladan el foco a la nueva selección. Los botones explícitos permiten usar ambas navegaciones sin gestos.
+8. Las ideas fuera de la ventana visible no reciben foco ni interacción. Las flechas de teclado trasladan el foco a la nueva selección; rueda y arrastre cambian la idea sin controles redundantes bajo el selector.
 
 ## Incorporar una idea
 

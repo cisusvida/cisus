@@ -171,63 +171,10 @@
     0 0 0 6px rgba(229, 188, 124, 0.065),
     0 12px 36px rgba(0, 0, 0, 0.24);
 }
-.orbit-choice:focus-visible {
-  outline: 2px solid #e5bc7c;
-  outline-offset: 2px;
-}
-.orbit-navigation {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-}
-.orbit-navigation button {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border-radius: 50%;
-  border: 1px solid rgba(195, 207, 180, 0.25);
-  color: #dfe8d4;
-  background: rgba(255, 255, 255, 0.025);
-  cursor: pointer;
-  transition:
-    background 180ms ease,
-    border-color 180ms ease;
-}
-.orbit-navigation button:hover {
-  background: #354331;
-  border-color: #bcc6a9;
-}
-.orbit-navigation button:focus-visible {
-  outline: 2px solid #e5bc7c;
-  outline-offset: 3px;
-}
-.orbit-navigation button:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-.orbit-navigation svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-}
-.orbit-count {
-  font-family: var(--font-brand);
-  font-variant-numeric: tabular-nums;
-  font-size: 0.8rem;
-}
-.orbit-count span {
-  color: #81917c;
-}
-.orbit-help {
-  text-align: center;
-  margin: 10px 0 0;
-  color: #97a58d;
-  font-size: 0.66rem;
+.orbit-choice:is(:focus, :focus-visible) {
+  // Never frame the whole product button: its SVG is the only visual treatment requested here.
+  outline: none;
+  box-shadow: none;
 }
 @media (max-width: 1050px) {
   .orbit {
@@ -262,9 +209,6 @@
   }
   .orbit-choice__label {
     font-size: 0.92rem;
-  }
-  .orbit-help {
-    margin-top: 7px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
