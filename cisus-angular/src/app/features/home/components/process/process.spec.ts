@@ -97,7 +97,6 @@ describe('Process experience', () => {
     first.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
     await fixture.whenStable();
     expect(scrollTo).toHaveBeenLastCalledWith({ left: 2370, behavior: 'instant' });
-    expect(button('Etapa siguiente').disabled).toBe(true);
     expect(cards[6].classList.contains('step--final')).toBe(true);
     expect(cards[6].classList.contains('step--active')).toBe(true);
     expect(document.activeElement).toBe(button('Seleccionar etapa 07: Hecho realidad'));
@@ -107,19 +106,21 @@ describe('Process experience', () => {
     );
     await fixture.whenStable();
     expect(scrollTo).toHaveBeenLastCalledWith({ left: 0, behavior: 'instant' });
-    expect(button('Etapa anterior').disabled).toBe(true);
     expect(rail.querySelectorAll('button[tabindex="0"]')).toHaveLength(1);
+    expect(fixture.nativeElement.querySelector('.process-navigation')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Etapa anterior"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Etapa siguiente"]')).toBeNull();
   });
 
-  it('lets manual scrolling interrupt arrow navigation and updates the nearest card', async () => {
-    button('Etapa siguiente').click();
+  it('lets scrolling interrupt a card selection and updates the nearest card', async () => {
+    button('Seleccionar etapa 02: Boceto').click();
     await fixture.whenStable();
     rail.dispatchEvent(new Event('pointerdown'));
     rail.scrollLeft = 395 * 4;
     rail.dispatchEvent(new Event('scrollend'));
     await fixture.whenStable();
     expect(cards[4].classList.contains('step--active')).toBe(true);
-    expect(fixture.nativeElement.querySelector('.process-count').textContent).toContain('05');
+    expect(button('Seleccionar etapa 05: Fabricación').getAttribute('aria-current')).toBe('step');
   });
 
   it('uses distinct SVG gradients for the selector and every placeholder', async () => {

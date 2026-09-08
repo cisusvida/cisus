@@ -29,8 +29,6 @@
     </div>
     <div
       class="steps-shell"
-      [class.steps-shell--at-start]="isAtStart()"
-      [class.steps-shell--at-end]="isAtEnd()"
       role="region"
       aria-roledescription="carrusel"
       aria-label="Etapas del ciclo de producto Cisus"
@@ -91,34 +89,6 @@
         }
       </div>
     </div>
-  </div>
-  <div class="process-navigation" aria-label="Navegación del proceso">
-    <button
-      type="button"
-      class="process-arrow"
-      aria-label="Etapa anterior"
-      aria-controls="process-steps"
-      [disabled]="isAtStart()"
-      (click)="moveStep(-1)"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6M8 12h12" /></svg>
-    </button>
-    <p class="process-position" aria-live="polite" aria-atomic="true">
-      <span class="process-count"
-        >{{ activeStep().number }} <span>/ 0{{ steps().length }}</span></span
-      >
-      <span>{{ activeStep().title }}</span>
-    </p>
-    <button
-      type="button"
-      class="process-arrow"
-      aria-label="Etapa siguiente"
-      aria-controls="process-steps"
-      [disabled]="isAtEnd()"
-      (click)="moveStep(1)"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6M4 12h12" /></svg>
-    </button>
   </div>
   <p id="process-scroll-hint" class="scroll-hint" [class.scroll-hint--hidden]="hasInteracted()">
     Desliza o elige una etapa <span aria-hidden="true">→</span>

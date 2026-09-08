@@ -40,10 +40,7 @@ export class Process {
     }));
   });
   protected readonly activeIndex = signal(0);
-  protected readonly activeStep = computed(() => this.steps()[this.activeIndex()]);
   protected readonly hasInteracted = signal(false);
-  protected readonly isAtStart = computed(() => this.activeIndex() === 0);
-  protected readonly isAtEnd = computed(() => this.activeIndex() === this.steps().length - 1);
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly stepsRail = viewChild.required<ElementRef<HTMLDivElement>>('stepsRail');
@@ -102,10 +99,6 @@ export class Process {
     this.scheduleScrollEnd();
   }
 
-  protected moveStep(direction: number): void {
-    this.selectStep(this.activeIndex() + direction);
-  }
-
   protected onRailKeydown(event: KeyboardEvent): void {
     let next: number;
 
@@ -150,7 +143,7 @@ export class Process {
   }
 
   /**
-   * Keep navigation and the active-step detector on the same reference point: the center of the
+   * Keep scroll centering and the active-step detector on the same reference point: the center of the
    * rail. The symmetric CSS edge gutter lets both the first and last cards reach that center.
    */
   private centerStep(index: number, behavior: ScrollBehavior): void {
