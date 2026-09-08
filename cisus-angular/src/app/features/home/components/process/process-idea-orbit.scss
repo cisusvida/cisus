@@ -120,9 +120,9 @@
   font-weight: 700;
   letter-spacing: 0.03em;
 }
-.orbit-choice__status {
-  font-size: 0.67rem;
-  color: #a9b99e;
+.orbit-choice:not(.orbit-choice--selected) .orbit-choice__label {
+  visibility: hidden;
+  opacity: 0;
 }
 .orbit-choice__check {
   display: grid;
@@ -156,9 +156,6 @@
 }
 .orbit-choice--selected .orbit-choice__check {
   transform: scale(1);
-}
-.orbit-choice--selected .orbit-choice__status {
-  color: #d9c493;
 }
 .orbit-choice:is(:hover, :focus-visible) {
   --trace-opacity: 1;

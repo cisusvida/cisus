@@ -95,6 +95,18 @@ describe('Process idea wheel', () => {
     expect(focusRule?.style.boxShadow).toBe('none');
   });
 
+  it('shows only the selected idea title and never renders a subtitle', () => {
+    const selectedLabel = fixture.nativeElement.querySelector(
+      '.orbit-choice--selected .orbit-choice__label',
+    ) as HTMLElement;
+    const unselectedLabel = fixture.nativeElement.querySelector(
+      '.orbit-choice:not(.orbit-choice--selected) .orbit-choice__label',
+    ) as HTMLElement;
+    expect(getComputedStyle(selectedLabel).visibility).toBe('visible');
+    expect(getComputedStyle(unselectedLabel).visibility).toBe('hidden');
+    expect(fixture.nativeElement.querySelector('.orbit-choice__status')).toBeNull();
+  });
+
   it('accepts one wheel detent per gesture and leaves browser zoom alone', async () => {
     let now = 1000;
     vi.spyOn(Date, 'now').mockImplementation(() => now);
