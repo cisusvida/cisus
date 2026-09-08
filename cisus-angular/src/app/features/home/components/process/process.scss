@@ -1,3 +1,9 @@
+@property --final-border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
 section {
   overflow: hidden;
   padding: 120px 0 110px;
@@ -24,53 +30,287 @@ section {
 .section-copy {
   color: rgba(255, 255, 255, 0.58);
 }
-.steps {
-  --steps-gutter: max(20px, calc((100vw - 1180px) / 2));
-
+.process-experience {
+  --step-width: clamp(330px, 43vw, 375px);
+  --step-height: 478px;
+  --rail-inset: 20px;
+  position: relative;
+  isolation: isolate;
+  margin-top: 46px;
+}
+/*
+ * One geometry owns centering: the rail always spans the scene.
+ * The selector has a protected left zone whose fade ends BEFORE the active card.
+ * Its layer never changes rail width, padding or the card's center.
+ */
+.process-experience::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc((100% - var(--step-width)) / 2 - 12px);
+  background: linear-gradient(90deg, var(--forest) 0%, var(--forest) 72%, transparent 100%);
+  pointer-events: none;
+}
+.idea-stage {
+  position: absolute;
+  z-index: 3;
+  top: 24px;
+  left: max(0px, calc((100% - var(--step-width)) / 2 - 300px));
+  width: 280px;
+}
+.process-story-heading {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  min-height: 22px;
+  font-family: var(--font-brand);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #a9b89d;
+  text-transform: uppercase;
+}
+.process-story-heading > span:first-child {
+  color: #eadcba;
+}
+.process-story-heading__divider {
+  width: 18px;
+  height: 1px;
+  background: #6c795f;
+}
+.steps-shell {
+  position: relative;
+  z-index: 1;
   width: 100%;
   min-width: 0;
-  gap: 16px;
-  margin-top: 56px;
-  padding: 8px var(--steps-gutter) 16px;
+}
+.steps {
+  --rail-edge: max(var(--rail-inset), calc((100% - var(--step-width)) / 2));
+
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  gap: 20px;
+  // The symmetric edge space lets the first and final cards sit at the same visual center.
+  padding: 34px var(--rail-edge) 38px;
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-inline: contain;
-  scrollbar-color: rgba(169, 184, 157, 0.56) rgba(255, 255, 255, 0.08);
-  scrollbar-width: thin;
-  scroll-padding-inline: var(--steps-gutter);
+  scrollbar-width: none;
+  scroll-padding-inline: var(--rail-edge);
   scroll-snap-type: x mandatory;
 }
 .steps::-webkit-scrollbar {
-  height: 7px;
+  display: none;
 }
-.steps::-webkit-scrollbar-track {
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+.scroll-hint {
+  width: min(1180px, calc(100% - 40px));
+  min-height: 16px;
+  margin: 8px auto 0;
+  color: #b7c0b3;
+  font-family: var(--font-brand);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
-.steps::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: rgba(169, 184, 157, 0.56);
+.scroll-hint span {
+  display: inline-block;
+  margin-left: 5px;
+  color: var(--orange);
+}
+.scroll-hint--hidden {
+  opacity: 0;
+  transform: translateX(6px);
 }
 .step {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex: 0 0 auto;
-  width: 255px;
-  min-height: 345px;
+  width: var(--step-width);
+  min-height: var(--step-height);
   padding: 23px;
   flex-direction: column;
   justify-content: space-between;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 20px;
+  overflow: hidden;
   background: rgba(255, 255, 255, 0.035);
-  scroll-snap-align: start;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  transform: translateY(0);
+  opacity: 0.58;
   transition:
-    background 0.25s,
-    transform 0.25s;
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
 }
-.step:hover {
-  background: rgba(169, 184, 157, 0.12);
-  transform: translateY(-8px);
+.step--active {
+  z-index: 2;
+  transform: translateY(-4px);
+  opacity: 1;
+  border-color: rgba(207, 222, 194, 0.42);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
+}
+.step--active:not(.step--final)::before {
+  position: absolute;
+  z-index: 4;
+  right: 24px;
+  bottom: 0;
+  left: 24px;
+  height: 1px;
+  content: '';
+  background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(169, 201, 154, 0.5) 28%,
+      rgba(232, 248, 218, 0.98) 50%,
+      rgba(244, 141, 92, 0.9) 72%,
+      transparent
+    )
+    no-repeat;
+  background-position: -65% 50%;
+  background-size: 42% 100%;
+  filter: drop-shadow(0 0 3px rgba(222, 244, 204, 0.5));
+  pointer-events: none;
+  opacity: 0;
+  animation: step-progress-glide 3.2s ease-in-out infinite;
+}
+.step--final.step--active {
+  border-color: rgba(207, 222, 194, 0.28);
+  box-shadow:
+    inset 0 0 22px rgba(199, 220, 181, 0.045),
+    0 14px 28px rgba(0, 0, 0, 0.22);
+}
+.step--final.step--active::before {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  content: '';
+  background: conic-gradient(
+    from var(--final-border-angle),
+    transparent 0deg,
+    transparent 228deg,
+    rgba(169, 201, 154, 0.24) 258deg,
+    rgba(222, 244, 204, 0.92) 286deg,
+    rgba(255, 203, 142, 0.98) 306deg,
+    rgba(236, 112, 66, 0.82) 326deg,
+    transparent 358deg
+  );
+  filter: drop-shadow(0 0 3px rgba(222, 244, 204, 0.48));
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: final-border-orbit 4.4s linear infinite;
+}
+.step-select {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.step-select:focus-visible {
+  outline: 2px solid #e8f8da;
+  outline-offset: -5px;
+  box-shadow: none;
+}
+.step::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  content: '';
+  background:
+    linear-gradient(
+      180deg,
+      rgba(17, 26, 20, 0.16) 0%,
+      rgba(17, 26, 20, 0.22) 38%,
+      rgba(17, 26, 20, 0.94) 100%
+    ),
+    linear-gradient(90deg, rgba(17, 26, 20, 0.34), transparent 72%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.step--with-image::after {
+  opacity: 1;
+}
+.step--pending {
+  border-color: rgba(232, 198, 31, 0.3);
+  background:
+    radial-gradient(circle at 76% 16%, rgba(232, 198, 31, 0.12), transparent 42%), var(--forest);
+}
+.step-placeholder {
+  position: absolute;
+  inset: 10% 18% 34%;
+  opacity: 0.22;
+  color: #d3dcc2;
+  --trace-opacity: 0;
+}
+.step-state {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: #f0e77f;
+  font-family: var(--font-brand);
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.step-image {
+  z-index: 0;
+  object-fit: cover;
+  transition: transform 0.45s ease;
+}
+.step-top,
+.step-copy {
+  position: relative;
+  z-index: 2;
+}
+.step--active .step-image {
+  transform: scale(1.035);
+}
+@media (hover: hover) and (pointer: fine) {
+  .step:not(.step--active):hover {
+    opacity: 0.94;
+    border-color: rgba(207, 222, 194, 0.38);
+  }
+}
+.step--with-image .step-top {
+  color: rgba(255, 255, 255, 0.84);
+}
+.step--with-image .step-top b {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(17, 26, 20, 0.24);
+  backdrop-filter: blur(7px);
+  color: #fff;
+}
+.step--with-image .step-copy p {
+  color: rgba(255, 255, 255, 0.82);
 }
 .step-top {
   display: flex;
@@ -99,6 +339,60 @@ h3 {
   font-size: 0.92rem;
   line-height: 1.6;
 }
+.process-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+.process-arrow {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgba(207, 222, 194, 0.4);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.045);
+  color: #e8f8da;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.process-arrow:hover:not(:disabled) {
+  background: rgba(169, 184, 157, 0.2);
+}
+.process-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.process-arrow svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+.process-position {
+  display: grid;
+  min-width: 136px;
+  gap: 4px;
+  margin: 0;
+  color: #dfe8da;
+  font-size: 0.8rem;
+  text-align: center;
+}
+.process-count {
+  font-family: var(--font-brand);
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+}
+.process-count span {
+  color: #a9b89d;
+}
 .process-note {
   display: flex;
   align-items: center;
@@ -116,21 +410,77 @@ h3 {
 .process-note p {
   margin: 0;
 }
+@keyframes final-border-orbit {
+  to {
+    --final-border-angle: 360deg;
+  }
+}
+@keyframes step-progress-glide {
+  0%,
+  18% {
+    background-position: -65% 50%;
+    opacity: 0;
+  }
+  32% {
+    opacity: 0.62;
+  }
+  64% {
+    opacity: 1;
+  }
+  84%,
+  100% {
+    background-position: 165% 50%;
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .step,
+  .step-image {
+    transition: none;
+  }
+  .step--active:not(.step--final)::before {
+    animation: none;
+    background-position: 50% 50%;
+    opacity: 0.72;
+  }
+  .step--final.step--active::before {
+    animation: none;
+    --final-border-angle: 306deg;
+  }
+}
+@media (max-width: 1050px) {
+  .process-experience::before {
+    display: none;
+  }
+  .idea-stage {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    margin: 0 auto 28px;
+  }
+}
 @media (max-width: 750px) {
   section {
-    padding: 88px 0 78px;
+    padding: 80px 0 68px;
   }
   .process-head {
     grid-template-columns: 1fr;
-    gap: 22px;
+    gap: 20px;
   }
-  .steps {
-    --steps-gutter: 14px;
-
-    margin-top: 37px;
+  .process-experience {
+    --step-width: min(300px, calc(100vw - 64px));
+    --step-height: 390px;
+    margin-top: 30px;
+  }
+  .process-story-heading {
+    font-size: 0.57rem;
+    gap: 8px;
+    letter-spacing: 0.035em;
   }
   .step {
-    width: 230px;
-    min-height: 315px;
+    min-height: var(--step-height);
+  }
+  .scroll-hint {
+    width: calc(100% - 28px);
   }
 }

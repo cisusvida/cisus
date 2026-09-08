@@ -1,9 +1,15 @@
 import { computed, Service, signal } from '@angular/core';
 import type { PortfolioItem } from '../models/portfolio-item';
-import type { ProcessStep } from '../models/process-step';
+import type { ProcessIdea, ProcessStep } from '../models/process-step';
 
 @Service()
 export class MarketingContent {
+  /** Catalogue order only; the orbit computes positions for any number of ideas. */
+  readonly processIdeas: ProcessIdea[] = [
+    { id: 'portavasos', label: 'Portavasos', illustration: 'coaster', status: 'realized' },
+    { id: 'tablas', label: 'Tablas', illustration: 'kitchen-board', status: 'developing' },
+  ];
+
   readonly processSteps: ProcessStep[] = [
     {
       id: 'idea',
@@ -46,6 +52,13 @@ export class MarketingContent {
       title: 'Distribución',
       subtitle: 'Llegamos a empresas asociadas y sus sucursales.',
       icon: '↗',
+    },
+    {
+      id: 'result',
+      number: '07',
+      title: 'Hecho realidad',
+      subtitle: 'La idea se convierte en un producto real, listo para usar y compartir.',
+      icon: '✓',
     },
   ];
 

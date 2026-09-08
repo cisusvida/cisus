@@ -11,20 +11,118 @@
       promociones y venta final.
     </p>
   </div>
-  <div class="steps" tabindex="0" aria-label="Etapas del ciclo de producto Cisus">
-    @for (step of steps; track step.id) {
-      <article class="step">
-        <div class="step-top">
-          <span>{{ step.number }}</span
-          ><b aria-hidden="true">{{ step.icon }}</b>
-        </div>
-        <div>
-          <h3>{{ step.title }}</h3>
-          <p>{{ step.subtitle }}</p>
-        </div>
-      </article>
-    }
+  <div class="process-experience">
+    <app-process-idea-orbit
+      class="idea-stage"
+      [ideas]="ideas"
+      [selectedId]="activeIdeaId()"
+      (selection)="selectIdea($event)"
+    />
+    <div class="process-story-heading">
+      <span>{{ activeIdea().label }}</span>
+      <span class="process-story-heading__divider" aria-hidden="true"></span>
+      <span>{{
+        activeIdea().status === 'developing'
+          ? 'Una nueva idea en desarrollo'
+          : 'Del primer trazo al producto'
+      }}</span>
+    </div>
+    <div
+      class="steps-shell"
+      [class.steps-shell--at-start]="isAtStart()"
+      [class.steps-shell--at-end]="isAtEnd()"
+      role="region"
+      aria-roledescription="carrusel"
+      aria-label="Etapas del ciclo de producto Cisus"
+    >
+      <div
+        #stepsRail
+        id="process-steps"
+        class="steps"
+        aria-describedby="process-scroll-hint"
+        (keydown)="onRailKeydown($event)"
+        (pointerdown)="markInteraction()"
+        (wheel)="markInteraction()"
+        (scroll)="onScroll()"
+        (scrollend)="onScrollEnd()"
+      >
+        @for (step of steps(); track step.id; let index = $index) {
+          <article
+            #stepCard
+            class="step"
+            [class.step--with-image]="!!step.imageUrl"
+            [class.step--pending]="activeIdea().status === 'developing' && !step.imageUrl"
+            [class.step--final]="step.id === 'result'"
+            [class.step--active]="activeIndex() === index"
+            aria-roledescription="diapositiva"
+            [attr.aria-label]="step.number + ' de ' + steps().length + ': ' + step.title"
+          >
+            @if (step.imageUrl) {
+              <img class="step-image" [ngSrc]="step.imageUrl" fill alt="" />
+            }
+            @if (!step.imageUrl) {
+              <div class="step-placeholder" aria-hidden="true">
+                <app-process-idea-icon
+                  [illustration]="activeIdea().illustration"
+                  [instanceId]="'pending-' + step.id"
+                />
+              </div>
+            }
+            <div class="step-top">
+              <span>{{ step.number }}</span
+              ><b aria-hidden="true">{{ step.icon }}</b>
+            </div>
+            <div class="step-copy">
+              @if (activeIdea().status === 'developing' && !step.imageUrl) {
+                <span class="step-state">En construcción</span>
+              }
+              <h3>{{ step.title }}</h3>
+              <p>{{ step.subtitle }}</p>
+            </div>
+            <button
+              type="button"
+              class="step-select"
+              [attr.aria-label]="'Seleccionar etapa ' + step.number + ': ' + step.title"
+              [attr.aria-current]="activeIndex() === index ? 'step' : null"
+              [tabIndex]="activeIndex() === index ? 0 : -1"
+              (click)="selectStep(index)"
+            ></button>
+          </article>
+        }
+      </div>
+    </div>
   </div>
+  <div class="process-navigation" aria-label="Navegación del proceso">
+    <button
+      type="button"
+      class="process-arrow"
+      aria-label="Etapa anterior"
+      aria-controls="process-steps"
+      [disabled]="isAtStart()"
+      (click)="moveStep(-1)"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6M8 12h12" /></svg>
+    </button>
+    <p class="process-position" aria-live="polite" aria-atomic="true">
+      <span class="process-count"
+        >{{ activeStep().number }} <span>/ 0{{ steps().length }}</span></span
+      >
+      <span>{{ activeStep().title }}</span>
+    </p>
+    <button
+      type="button"
+      class="process-arrow"
+      aria-label="Etapa siguiente"
+      aria-controls="process-steps"
+      [disabled]="isAtEnd()"
+      (click)="moveStep(1)"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6M4 12h12" /></svg>
+    </button>
+  </div>
+  <p id="process-scroll-hint" class="scroll-hint" [class.scroll-hint--hidden]="hasInteracted()">
+    Desliza o elige una etapa <span aria-hidden="true">→</span>
+  </p>
   <div class="container process-note">
     <span></span>
     <p>

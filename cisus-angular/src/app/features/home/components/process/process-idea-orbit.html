@@ -1,0 +1,78 @@
+<div
+  class="orbit"
+  role="group"
+  aria-label="Explorar ideas de producto"
+  (keydown)="onKeydown($event)"
+>
+  <div class="orbit-heading"><span class="orbit-heading__dash"></span> Elige una idea</div>
+  <div
+    class="orbit-dial"
+    [class.orbit-dial--dragging]="dragging()"
+    (wheel)="onWheel($event)"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp($event)"
+    (pointercancel)="cancelPointer()"
+    (lostpointercapture)="cancelPointer()"
+  >
+    <div class="orbit-atmosphere" aria-hidden="true"></div>
+    @for (item of items(); track item.idea.id) {
+      <div
+        class="orbit-arm"
+        [class.orbit-arm--hidden]="!item.visible"
+        [class.orbit-arm--selected]="item.relative === 0"
+        [style.--angle]="item.angle + dragAngle() + 'deg'"
+        [style.--scale]="item.scale"
+        [attr.aria-hidden]="!item.visible ? 'true' : null"
+      >
+        <div class="orbit-counterweight">
+          <button
+            type="button"
+            class="orbit-choice"
+            [class.orbit-choice--selected]="item.relative === 0"
+            [attr.aria-pressed]="item.relative === 0"
+            [attr.aria-label]="'Mostrar las etapas de ' + item.idea.label"
+            aria-controls="process-steps"
+            [tabIndex]="item.visible ? 0 : -1"
+            [disabled]="!item.visible"
+            (click)="clickIdea(item.position)"
+          >
+            <span class="orbit-choice__disc">
+              <app-process-idea-icon
+                [illustration]="item.idea.illustration"
+                [instanceId]="instanceId() + '-' + item.idea.id"
+              />
+              <span class="orbit-choice__check" aria-hidden="true">✓</span>
+            </span>
+            <span class="orbit-choice__label">{{ item.idea.label }}</span>
+            <span class="orbit-choice__status">{{
+              item.idea.status === 'developing' ? 'En desarrollo' : 'Hecho realidad'
+            }}</span>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+  <div class="orbit-navigation">
+    <button
+      type="button"
+      aria-label="Idea anterior"
+      [disabled]="ideas().length < 2"
+      (click)="move(-1)"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6" /></svg>
+    </button>
+    <span class="orbit-count" aria-live="polite"
+      >{{ selectedIndex() + 1 }} <span>/ {{ ideas().length }}</span></span
+    >
+    <button
+      type="button"
+      aria-label="Idea siguiente"
+      [disabled]="ideas().length < 2"
+      (click)="move(1)"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6" /></svg>
+    </button>
+  </div>
+  <p class="orbit-help">Gira o desliza para explorar</p>
+</div>
