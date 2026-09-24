@@ -4,19 +4,33 @@
   aria-label="Explorar ideas de producto"
   (keydown)="onKeydown($event)"
 >
-  <div class="orbit-heading"><span class="orbit-heading__dash"></span> Elige una idea</div>
+  <div class="orbit-heading">
+    <span>Elige una idea</span>
+    <svg
+      class="orbit-heading__arrow"
+      viewBox="0 0 71 56"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <g transform="matrix(1,0,0,1,-382.757181,-315.313644)">
+        <g transform="matrix(0.055094,0.998481,-0.998481,0.055094,737.66637,-93.257035)">
+          <path
+            d="M392.134,375.065C405.602,374.253 413.125,365.586 419.163,354.95C425.376,344.007 426.916,332.369 424.205,319.552C420.483,325.755 418.77,332.867 412.034,337.801C412.328,336.01 412.216,335.046 412.629,334.439C416.913,328.132 419.694,321.166 421.863,313.914C422.138,312.996 422.444,312.059 422.914,311.233C424.195,308.986 425.96,308.564 428.135,309.925C428.673,310.261 429.16,310.698 429.61,311.15C433.873,315.435 438.182,319.656 444.077,321.896C438.587,324.284 434.352,321.755 430.288,318.331C430.288,323.994 430.726,329.256 430.205,334.42C428.674,349.599 422.394,362.462 409.935,371.647C406.691,374.038 402.556,375.384 398.652,376.663C395.856,377.579 394.999,376.991 392.134,375.065Z"
+            fill-rule="nonzero"
+          />
+        </g>
+      </g>
+    </svg>
+  </div>
   <div
     class="orbit-dial"
     [class.orbit-dial--dragging]="dragging()"
-    (wheel)="onWheel($event)"
-    (pointerdown)="onPointerDown($event)"
     (pointermove)="onPointerMove($event)"
     (pointerup)="onPointerUp($event)"
     (pointercancel)="cancelPointer()"
     (lostpointercapture)="cancelPointer()"
   >
-    <div class="orbit-atmosphere" aria-hidden="true"></div>
-    @for (item of items(); track item.idea.id) {
+    @for (item of items(); track item.position) {
       <div
         class="orbit-arm"
         [class.orbit-arm--hidden]="!item.visible"
@@ -35,14 +49,17 @@
             aria-controls="process-steps"
             [tabIndex]="item.visible ? 0 : -1"
             [disabled]="!item.visible"
-            (click)="clickIdea(item.position)"
+            (click)="clickIdea($event, item.position)"
           >
-            <span class="orbit-choice__disc">
+            <span
+              class="orbit-choice__disc"
+              (wheel)="onWheel($event)"
+              (pointerdown)="onPointerDown($event)"
+            >
               <app-process-idea-icon
                 [illustration]="item.idea.illustration"
-                [instanceId]="instanceId() + '-' + item.idea.id"
+                [instanceId]="instanceId() + '-' + item.position + '-' + item.idea.id"
               />
-              <span class="orbit-choice__check" aria-hidden="true">✓</span>
             </span>
             <span class="orbit-choice__label">{{ item.idea.label }}</span>
           </button>

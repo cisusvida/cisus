@@ -3,6 +3,7 @@ export type UserRole =
   | 'platform_admin'
   | 'cisus_commercial_admin'
   | 'cisus_operations'
+  | 'cisus_designer'
   | 'company_admin'
   | 'branch_manager'
   | 'sales_associate'

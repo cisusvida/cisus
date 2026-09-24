@@ -13,7 +13,9 @@ describe('Process experience', () => {
   let disconnect: ReturnType<typeof vi.fn>;
   let scrollTo: ReturnType<typeof vi.fn>;
   const button = (label: string) =>
-    fixture.nativeElement.querySelector('button[aria-label="' + label + '"]') as HTMLButtonElement;
+    fixture.nativeElement.querySelector(
+      'button:not(:disabled)[aria-label="' + label + '"]',
+    ) as HTMLButtonElement;
 
   beforeEach(async () => {
     unsubscribe = vi.fn();
@@ -133,6 +135,35 @@ describe('Process experience', () => {
       expect(trace.getAttribute('stroke')).toMatch(/^url\(#idea-trace-/);
       expect(trace.getAttribute('vector-effect')).toBe('non-scaling-stroke');
     }
+  });
+
+  it('keeps the cards below a fixed left fade that ends before the centred card', () => {
+    const rules = [...document.styleSheets].flatMap((sheet) => [...sheet.cssRules]);
+    const rule = (selector: string) =>
+      rules.find(
+        (candidate): candidate is CSSStyleRule =>
+          candidate instanceof CSSStyleRule && candidate.selectorText.includes(selector),
+      );
+    const fade = rule('.process-experience')?.selectorText.includes('::before')
+      ? rule('.process-experience')
+      : rules.find(
+          (candidate): candidate is CSSStyleRule =>
+            candidate instanceof CSSStyleRule &&
+            candidate.selectorText.includes('.process-experience') &&
+            candidate.selectorText.includes('::before'),
+        );
+    const shell = rule('.steps-shell');
+    const selector = rule('.idea-stage');
+    const componentCss = [...document.querySelectorAll('style')]
+      .map((style) => style.textContent)
+      .join('\n');
+
+    expect(fade?.style.zIndex).toBe('2');
+    expect(fade?.style.width).toContain('/ 2 - 8px');
+    expect(componentCss).toContain('var(--forest) calc(100% - 64px)');
+    expect(shell?.style.zIndex).toBe('1');
+    expect(selector?.style.zIndex).toBe('3');
+    expect(selector?.style.left).toContain('/ 2 - 336px');
   });
 
   it('releases its live media subscription and resize observer on destroy', () => {

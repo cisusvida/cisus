@@ -1,5 +1,5 @@
-import { computed, Service, signal } from '@angular/core';
-import type { PortfolioItem } from '../models/portfolio-item';
+import { Service } from '@angular/core';
+import type { ProductFamily } from '../models/portfolio-item';
 import type { ProcessIdea, ProcessStep } from '../models/process-step';
 
 @Service()
@@ -50,7 +50,8 @@ export class MarketingContent {
       id: 'delivery',
       number: '06',
       title: 'Distribución',
-      subtitle: 'Llegamos a empresas asociadas y sus sucursales.',
+      subtitle:
+        'Preparamos cada pieza para que llegue a tus manos o a las personas con quienes quieras compartirla.',
       icon: '↗',
     },
     {
@@ -62,48 +63,116 @@ export class MarketingContent {
     },
   ];
 
-  private readonly portfolioState = signal<PortfolioItem[]>([
+  readonly productFamilies: ProductFamily[] = [
     {
       id: 'tablas',
-      title: 'Tablas Cisus',
-      summary: 'Una pieza noble pensada para compartir.',
-      description:
-        'Productos de madera diseñados y fabricados por Cisus para regalos y experiencias cotidianas.',
-      category: 'Madera',
-      tags: ['Cisus', 'Madera', 'Diseño local'],
-      price: 28990,
-      cover: '/images/home_card.jpeg',
-      featured: true,
-      deliverables: ['Diseño Cisus', 'Fabricación trazable', 'Control de calidad'],
+      label: 'Tablas de cocina',
+      heading: 'TABLAS DE COCINA',
+      claim: 'Arte funcional para tu espacio',
+      types: [
+        {
+          id: 'animales',
+          label: 'Conceptuales de animales',
+          icon: 'paw',
+          models: [
+            { productId: 'cisus_tabla_felino' },
+            { productId: 'cisus_tabla_delfin' },
+            { productId: 'cisus_tabla_zorro' },
+          ],
+        },
+        {
+          id: 'relieve',
+          label: 'Relieve de paisajes',
+          icon: 'relief',
+          models: [{ productId: 'cisus_tabla_relieve' }],
+        },
+      ],
     },
+    {
+      id: 'pomos_tiradores',
+      label: 'Pomos y tiradores',
+      heading: 'POMOS Y TIRADORES',
+      claim: 'El detalle que cambia tus muebles.',
+      commercialState: 'design_concept',
+      conceptLabel: 'Colección en desarrollo',
+      imageDisclosure: 'Visualización de diseño',
+      detailNotice:
+        'Modelo en desarrollo. Medidas, madera, fijación y disponibilidad por confirmar.',
+      types: [
+        {
+          id: 'pomos',
+          label: 'Pomos',
+          icon: 'knob',
+          models: [
+            {
+              productId: 'cisus_pomo_orbita',
+              metadata: 'Pomo de disco · Madera',
+              sceneObjectFit: 'contain',
+            },
+            {
+              productId: 'cisus_pomo_boton',
+              metadata: 'Pomo redondo · Madera',
+              sceneObjectFit: 'contain',
+            },
+            {
+              productId: 'cisus_pomo_canto',
+              metadata: 'Pomo cuadrado · Madera',
+              sceneObjectFit: 'contain',
+            },
+          ],
+        },
+        {
+          id: 'tiradores',
+          label: 'Tiradores',
+          icon: 'handle',
+          models: [
+            {
+              productId: 'cisus_tirador_encuentro',
+              metadata: 'Tirador en pareja · Madera',
+              sceneObjectFit: 'contain',
+            },
+            {
+              productId: 'cisus_tirador_brisa',
+              metadata: 'Tirador orgánico · Madera',
+              sceneObjectFit: 'contain',
+            },
+            {
+              productId: 'cisus_tirador_borde',
+              metadata: 'Tirador de perfil · Madera',
+              sceneObjectFit: 'contain',
+            },
+            {
+              productId: 'cisus_tirador_tallo',
+              metadata: 'Tirador vertical · Madera',
+              sceneObjectFit: 'contain',
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  readonly portfolioCompanionProductIds = [
+    'cisus_mesa_cauce',
+    'cisus_mueble_linde',
+    'cisus_repisa_senda',
+    'cisus_banco_raiz',
+    'cisus_lampara_claro',
+    'cisus_pedestal_brote',
+  ];
+
+  readonly commercialLines = [
     {
       id: 'series',
       title: 'Series especiales',
-      summary: 'Ediciones disponibles mediante empresas asociadas.',
       description:
-        'Series de temporada y promociones comerciales definidas por suscripción y acuerdo.',
-      category: 'Ediciones',
-      tags: ['Temporada', 'Promociones'],
-      price: 34990,
-      cover: '/images/portfolio_002.svg',
-      featured: true,
-      deliverables: ['Producto original', 'Disponibilidad por sucursal'],
+        'Series de temporada y ediciones mediante empresas asociadas, sujetas a disponibilidad y acuerdo.',
     },
     {
       id: 'corporativo',
       title: 'Línea corporativa',
-      summary: 'Productos Cisus para vínculos duraderos.',
       description:
-        'Soluciones comerciales para empresas, con modelos mayoristas, consignación o comisión.',
-      category: 'Corporativo',
-      tags: ['Empresa', 'Regalos'],
-      price: 45990,
-      cover: '/images/portfolio_003.svg',
-      featured: true,
-      deliverables: ['Acuerdo comercial', 'Distribución multisucursal'],
+        'Productos Cisus para vínculos duraderos, con modelos mayoristas, consignación o comisión.',
     },
-  ]);
-
-  readonly portfolio = this.portfolioState.asReadonly();
-  readonly featured = computed(() => this.portfolioState().filter((item) => item.featured));
+  ];
 }

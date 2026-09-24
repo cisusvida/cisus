@@ -24,7 +24,7 @@ exports.manageAccessContract = (0, define_scoped_callable_1.defineScopedCallable
     const targetUid = requiredId(data.targetUid, 'targetUid');
     const entityId = requiredId(data.entityId, 'entityId');
     const status = data.status === 'suspended' ? 'suspended' : 'active';
-    if (!(0, role_catalog_1.isCisusRole)(data.jobRoleId) || data.jobRoleId === 'platform_admin') {
+    if (!(0, role_catalog_1.canAssignRole)(context.jobRoleId, data.jobRoleId)) {
         throw new https_1.HttpsError('invalid-argument', 'jobRoleId is not assignable in a tenant.', {
             code: 'INVALID_JOB_ROLE',
         });

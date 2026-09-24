@@ -12,9 +12,7 @@ section {
 }
 .process-head {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 50px;
-  align-items: end;
+  gap: 20px;
 }
 .section-title {
   margin-bottom: 0;
@@ -28,6 +26,8 @@ section {
   color: var(--orange);
 }
 .section-copy {
+  margin: 0;
+  max-width: 60ch;
   color: rgba(255, 255, 255, 0.58);
 }
 .process-experience {
@@ -38,31 +38,46 @@ section {
   isolation: isolate;
   margin-top: 46px;
 }
+.process-media-editor {
+  position: relative;
+  display: block;
+  inset: auto;
+  z-index: 5;
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  margin: 0 16px 14px auto;
+}
 /*
  * One geometry owns centering: the rail always spans the scene.
- * The selector has a protected left zone whose fade ends BEFORE the active card.
- * Its layer never changes rail width, padding or the card's center.
+ * All cards share one layer below the left protective fade; the idea selector stays above both.
+ * The overlay is independent of selection and ends before the centred card.
  */
 .process-experience::before {
   content: '';
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   top: 0;
   bottom: 0;
   left: 0;
-  width: calc((100% - var(--step-width)) / 2 + 100px);
-  background: linear-gradient(90deg, var(--forest) 0%, var(--forest) 72%, transparent 100%);
+  width: max(0px, calc((100% - var(--step-width)) / 2 - 8px));
+  background: linear-gradient(
+    90deg,
+    var(--forest) 0%,
+    var(--forest) calc(100% - 64px),
+    transparent 100%
+  );
   pointer-events: none;
 }
 .idea-stage {
   position: absolute;
   z-index: 3;
-  top: 24px;
-  left: max(0px, calc((100% - var(--step-width)) / 2 - 300px));
+  top: 30px;
+  left: max(0px, calc((100% - var(--step-width)) / 2 - 336px));
   width: 280px;
 }
 .steps-shell {
   position: relative;
+  z-index: 1;
   width: 100%;
   min-width: 0;
 }
@@ -379,7 +394,7 @@ h3 {
     position: relative;
     inset: auto;
     width: 100%;
-    margin: 0 auto 28px;
+    margin: 0 auto;
   }
 }
 @media (max-width: 750px) {

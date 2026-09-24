@@ -27,10 +27,11 @@
   @if (!auth.contexts().length) {
     <section class="help-card" aria-labelledby="no-access-title">
       <div>
-        <p class="eyebrow">Acceso pendiente</p>
-        <h2 id="no-access-title">Tu cuenta todavía no tiene un contrato activo.</h2>
-        <p>Un administrador de la empresa debe asignarte una sucursal y un rol.</p>
+        <p class="eyebrow">Acceso de cuenta</p>
+        <h2 id="no-access-title">¿Ingresaste como cliente final?</h2>
+        <p>Los proyectos de compra y sus documentos están separados de los roles internos.</p>
       </div>
+      <a class="button button--orange" routerLink="/mis-proyectos">Abrir mis proyectos →</a>
     </section>
   } @else if (!auth.hasActiveContext()) {
     <p class="empty-state">Selecciona un contexto para comenzar.</p>

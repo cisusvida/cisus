@@ -6,12 +6,19 @@ import type {
   CompanyWorkspace,
   AccessContractSummary,
   InventoryItem,
+  PublicMediaKind,
   PromotionSummary,
   SaleSummary,
 } from '../../../../core/models/commerce';
 import { Auth } from '../../../../core/services/auth';
 import { CommerceGateway } from '../../../../core/services/commerce-gateway';
+import { MarketingContent } from '../../../../core/services/marketing-content';
 import { Toast } from '../../../../core/services/toast';
+import {
+  PROCESS_IDEA_MEDIA_TARGETS,
+  type ProcessIdeaId,
+  type ProcessStepId,
+} from '../../../../core/models/process-step';
 
 type WorkspaceTab = 'overview' | 'inventory' | 'sales' | 'customers' | 'administration';
 
@@ -24,6 +31,7 @@ type WorkspaceTab = 'overview' | 'inventory' | 'sales' | 'customers' | 'administ
 export class Dashboard {
   protected readonly auth = inject(Auth);
   private readonly commerce = inject(CommerceGateway);
+  private readonly marketingContent = inject(MarketingContent);
   private readonly toast = inject(Toast);
   protected readonly tab = signal<WorkspaceTab>('overview');
   protected readonly loading = signal(true);
@@ -36,6 +44,8 @@ export class Dashboard {
   protected readonly promotions = signal<PromotionSummary[]>([]);
   protected readonly mediaProductId = signal('');
   protected readonly mediaUploading = signal(false);
+  protected readonly processIdeas = this.marketingContent.processIdeas;
+  protected readonly processSteps = this.marketingContent.processSteps;
   protected readonly branchId = signal(this.auth.activeContext()?.entityId ?? '');
   protected readonly stockUnits = computed(() =>
     this.inventory().reduce((total, item) => total + Number(item.quantity || 0), 0),
@@ -133,9 +143,13 @@ export class Dashboard {
     this.mediaProductId.set((event.target as HTMLSelectElement).value);
   }
 
+  protected processMediaTarget(ideaId: ProcessIdeaId, stepId: ProcessStepId): string {
+    return PROCESS_IDEA_MEDIA_TARGETS[ideaId][stepId];
+  }
+
   protected async uploadMedia(
     event: Event,
-    kind: 'home' | 'product',
+    kind: PublicMediaKind,
     targetId: string,
   ): Promise<void> {
     const input = event.target as HTMLInputElement;
@@ -163,8 +177,12 @@ export class Dashboard {
       this.toast.show(
         'Imagen publicada',
         kind === 'home'
-          ? 'La portada se actualizará automáticamente.'
-          : 'El catálogo usará la nueva versión.',
+          ? 'La imagen de Home se actualizará automáticamente.'
+          : kind === 'process'
+            ? 'La etapa del proceso se actualizará automáticamente.'
+            : kind === 'product_scene'
+              ? 'La imagen transparente de Home usará la nueva versión.'
+              : 'El catálogo usará la nueva versión.',
       );
       await this.load();
       this.tab.set('administration');

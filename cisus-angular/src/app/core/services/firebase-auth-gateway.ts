@@ -6,6 +6,7 @@ import {
   signInWithCustomToken,
   signInWithEmailAndPassword,
   signInWithPopup,
+  sendPasswordResetEmail,
   signOut,
   updateProfile,
   type User as FirebaseUser,
@@ -51,6 +52,10 @@ export class FirebaseAuthGateway {
     const credential = await createUserWithEmailAndPassword(this.client.auth, email, password);
     await updateProfile(credential.user, { displayName: name });
     return this.requiredIdentity(credential.user);
+  }
+
+  sendPasswordReset(email: string): Promise<void> {
+    return sendPasswordResetEmail(this.client.auth, email);
   }
 
   async listContexts(): Promise<AccessContext[]> {

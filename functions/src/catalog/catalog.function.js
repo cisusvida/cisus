@@ -6,13 +6,54 @@ const firebase_admin_1 = require("../shared/firebase-admin");
 const define_scoped_callable_1 = require("../security/define-scoped-callable");
 function mapProduct(id, data) {
     var _a, _b, _c, _d, _e;
+    const legacyRelatedSources = { scene: 'product_scene', catalog: 'product', thumbnail: 'product_thumbnail' };
+    const relatedImageSource = legacyRelatedSources[data.relatedImageSource] ?? data.relatedImageSource;
+    const validRelatedSources = ['auto', 'product', 'product_scene', 'product_thumbnail', 'product_customization', 'product_related', ...[2,3,4,5,6].map(index => `product_scene_${index}`)];
+    const sceneAnimationTarget = ['first', 'both'].includes(data.sceneAnimationTarget) ? data.sceneAnimationTarget : 'last';
+    const publishedOverlays = [2, 3, 4, 5, 6].filter(index =>
+        typeof data[`sceneLayer${index}Path`] === 'string'
+        && data[`sceneLayer${index}Path`].startsWith(`public-media/product-layers/${id}/${index}/`));
+    const basePublished = typeof data.sceneImagePath === 'string'
+        && data.sceneImagePath.startsWith(`public-media/product-scenes/${id}/`);
+    const legacyAnimationLayerKeys = sceneAnimationTarget === 'first'
+        ? (basePublished ? ['product_scene'] : [])
+        : sceneAnimationTarget === 'both'
+            ? (basePublished && publishedOverlays.length ? ['product_scene', `product_scene_${publishedOverlays[publishedOverlays.length - 1]}`] : [])
+            : (publishedOverlays.length ? [`product_scene_${publishedOverlays[publishedOverlays.length - 1]}`] : []);
+    const allowedAnimationLayerKeys = ['product_scene', ...[2, 3, 4, 5, 6].map(index => `product_scene_${index}`)];
+    const sceneAnimationLayerKeys = Array.isArray(data.sceneAnimationLayerKeys)
+        ? data.sceneAnimationLayerKeys.filter(key => allowedAnimationLayerKeys.includes(key))
+        : legacyAnimationLayerKeys;
+    const hasAnimationRecipient = sceneAnimationLayerKeys.length > 0
+        && sceneAnimationLayerKeys.every(key => key === 'product_scene' ? basePublished : publishedOverlays.includes(Number(key.slice(-1))));
     return {
         id,
         sku: String((_a = data.sku) !== null && _a !== void 0 ? _a : ''),
         name: String((_b = data.name) !== null && _b !== void 0 ? _b : 'Producto Cisus'),
         description: String((_c = data.description) !== null && _c !== void 0 ? _c : ''),
+        materialLabel: typeof data.materialLabel === 'string' ? data.materialLabel : null,
+        shortDescription: typeof data.shortDescription === 'string' ? data.shortDescription : null,
         imagePath: typeof data.imagePath === 'string' ? data.imagePath : null,
         imageUrl: null,
+        sceneImagePath: typeof data.sceneImagePath === 'string' ? data.sceneImagePath : null,
+        sceneImageUrl: null,
+        thumbnailImagePath: typeof data.thumbnailImagePath === 'string' ? data.thumbnailImagePath : null,
+        relatedImagePath: typeof data.relatedImagePath === 'string' && data.relatedImagePath.startsWith(`public-media/product-related/${id}/`)
+            ? data.relatedImagePath
+            : null,
+        relatedImageSource: validRelatedSources.includes(relatedImageSource)
+            ? relatedImageSource
+            : 'auto',
+        customizationImagePath: typeof data.customizationImagePath === 'string' ? data.customizationImagePath : null,
+        customization: {
+            enabled: data.customization?.enabled === true,
+            label: typeof data.customization?.label === 'string' ? data.customization.label.trim().slice(0, 40) : '',
+        },
+        sceneAnimation: ['appear','disappear'].includes(data.sceneAnimation) && hasAnimationRecipient ? data.sceneAnimation : 'none',
+        sceneAnimationTarget,
+        sceneAnimationLayerKeys,
+        sceneLayers: [2,3,4,5,6].flatMap(i => typeof data[`sceneLayer${i}Path`] === 'string'
+            ? [{ kind: `product_scene_${i}`, targetId: id, path: data[`sceneLayer${i}Path`], url: null }] : []),
         basePrice: Number((_d = data.basePrice) !== null && _d !== void 0 ? _d : 0),
         currency: String((_e = data.currency) !== null && _e !== void 0 ? _e : 'CLP'),
     };

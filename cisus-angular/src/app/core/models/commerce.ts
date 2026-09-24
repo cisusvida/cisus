@@ -21,8 +21,24 @@ export interface CatalogProduct {
   sku: string;
   name: string;
   description: string;
+  materialLabel?: string | null;
+  shortDescription?: string | null;
   imagePath: string | null;
   imageUrl: string | null;
+  sceneImagePath?: string | null;
+  sceneImageUrl?: string | null;
+  thumbnailImagePath?: string | null;
+  thumbnailImageUrl?: string | null;
+  relatedImagePath?: string | null;
+  relatedImageUrl?: string | null;
+  relatedImageSource?: RelatedImageSource;
+  sceneLayers?: MediaLayer[];
+  sceneAnimation?: MediaAnimation;
+  sceneAnimationTarget?: MediaAnimationTarget;
+  sceneAnimationLayerKeys?: MediaAnimationLayerKey[];
+  customization?: ProductCustomization;
+  customizationImagePath?: string | null;
+  customizationImageUrl?: string | null;
   basePrice: number;
   currency: string;
   enabled?: boolean;
@@ -33,7 +49,45 @@ export interface CatalogProduct {
   commissionRate?: number;
 }
 
-export type PublicMediaKind = 'home' | 'product';
+export type MediaAnimation = 'none' | 'appear' | 'disappear';
+export type MediaAnimationTarget = 'first' | 'last' | 'both';
+export type MediaAnimationLayerKey =
+  | 'hero'
+  | 'hero_carving'
+  | `hero_layer_${3 | 4 | 5 | 6}`
+  | 'product_scene'
+  | `product_scene_${2 | 3 | 4 | 5 | 6}`;
+export type RelatedImageSource =
+  | 'auto'
+  | 'product'
+  | 'product_scene'
+  | 'product_thumbnail'
+  | 'product_customization'
+  | 'product_related'
+  | `product_scene_${2 | 3 | 4 | 5 | 6}`;
+export interface MediaAnimationConfiguration {
+  animation: MediaAnimation;
+  animationLayerKeys: MediaAnimationLayerKey[];
+}
+export interface ProductCustomization {
+  enabled: boolean;
+  label: string;
+}
+export interface MediaLayer {
+  kind: PublicMediaKind;
+  targetId: string;
+  path?: string | null;
+  url: string | null;
+}
+export type PublicMediaKind =
+  | 'home'
+  | 'process'
+  | 'product'
+  | 'product_scene'
+  | 'product_thumbnail'
+  | 'product_customization'
+  | 'product_related'
+  | `product_scene_${2 | 3 | 4 | 5 | 6}`;
 
 export interface PublicMediaReference {
   kind: PublicMediaKind;

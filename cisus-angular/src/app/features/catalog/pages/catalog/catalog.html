@@ -71,15 +71,26 @@
 </main>
 <app-footer />
 @if (selected(); as item) {
-  <div class="modal-backdrop" (click)="close()">
-    <section
-      class="modal"
-      role="dialog"
-      aria-modal="true"
-      [attr.aria-labelledby]="'catalog-modal-' + item.id"
-      (click)="$event.stopPropagation()"
+  <dialog
+    #modal
+    class="modal"
+    [attr.aria-labelledby]="'catalog-modal-' + item.id"
+    (cancel)="$event.preventDefault(); close()"
+  >
+    <button
+      autofocus
+      class="close modal-dismiss"
+      type="button"
+      aria-label="Cerrar"
+      (click)="close()"
     >
-      <button class="close" type="button" aria-label="Cerrar" (click)="close()">×</button>
+      ×
+    </button>
+    <div
+      #modalScroll
+      class="modal-scroll modal-scrollbar modal-scrollbar--close-clearance"
+      (scroll)="syncScrollbar()"
+    >
       <div class="modal-content">
         <p class="eyebrow">{{ item.sku }}</p>
         <h2 [id]="'catalog-modal-' + item.id">{{ item.name }}</h2>
@@ -90,6 +101,12 @@
         </div>
         <a class="button button--orange" routerLink="/login">Ingresar como empresa asociada →</a>
       </div>
-    </section>
-  </div>
+    </div>
+    <span
+      class="modal-scroll-indicator modal-scrollbar--close-clearance"
+      aria-hidden="true"
+      [style.--modal-scrollbar-thumb-height]="scrollbarThumbHeight()"
+      [style.--modal-scrollbar-thumb-offset]="scrollbarThumbOffset()"
+    ></span>
+  </dialog>
 }

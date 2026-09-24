@@ -107,6 +107,35 @@ input {
 .operation-form button {
   justify-self: start;
 }
+.media-group {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid #ddd8ca;
+  border-radius: 0.75rem;
+}
+.media-group legend {
+  padding-inline: 0.35rem;
+  color: #17352f;
+  font-weight: 800;
+}
+.media-group p {
+  margin: 0;
+  color: #6c756f;
+  font-size: 0.9rem;
+}
+.media-group--idea {
+  grid-column: auto;
+  margin: 0;
+  background: rgba(247, 245, 235, 0.58);
+}
+.media-input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 0.85rem;
+}
 .table-wrap {
   overflow-x: auto;
 }

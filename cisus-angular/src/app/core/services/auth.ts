@@ -8,6 +8,8 @@ export class Auth {
   private readonly identityState = signal<FirebaseIdentity | undefined>(undefined);
   private readonly contextsState = signal<AccessContext[]>([]);
   private readonly activeContextState = signal<ActiveAccessContext | undefined>(undefined);
+  private identityVersion = 0;
+  private contextRefresh: Promise<void> | undefined;
 
   readonly contexts = this.contextsState.asReadonly();
   readonly activeContext = this.activeContextState.asReadonly();
@@ -38,10 +40,16 @@ export class Auth {
 
   constructor() {
     this.gateway.observeIdentity((identity) => {
+      const identityChanged = this.identityState()?.uid !== identity?.uid;
       this.identityState.set(identity);
-      if (!identity) {
+      if (identityChanged || !identity) {
+        ++this.identityVersion;
+        this.contextRefresh = undefined;
         this.contextsState.set([]);
         this.activeContextState.set(undefined);
+      }
+      if (identityChanged && identity) {
+        void this.refreshContexts(false).catch(() => undefined);
       }
     });
   }
@@ -61,11 +69,17 @@ export class Auth {
     await this.refreshContexts(false);
   }
 
+  sendPasswordReset(email: string): Promise<void> {
+    return this.gateway.sendPasswordReset(email);
+  }
+
   async switchContext(scopeId: string): Promise<void> {
     if (!this.contextsState().some((context) => context.scopeId === scopeId)) {
       throw new Error('The requested context is not assigned to this user.');
     }
-    this.activeContextState.set(await this.gateway.activateContext(scopeId));
+    const version = this.identityVersion;
+    const context = await this.gateway.activateContext(scopeId);
+    if (version === this.identityVersion) this.activeContextState.set(context);
   }
 
   async signOut(): Promise<void> {
@@ -76,16 +90,26 @@ export class Auth {
   }
 
   private async refreshContexts(activateSingleContext: boolean): Promise<void> {
-    const contexts = await this.gateway.listContexts();
-    this.contextsState.set(contexts);
-
-    const restored = await this.gateway.restoreActiveContext(contexts);
-    if (restored) {
-      this.activeContextState.set(restored);
-      return;
+    const version = this.identityVersion;
+    if (!this.contextRefresh) {
+      const pending = (async () => {
+        const contexts = await this.gateway.listContexts();
+        if (version !== this.identityVersion) return;
+        const restored = await this.gateway.restoreActiveContext(contexts);
+        if (version !== this.identityVersion) return;
+        this.contextsState.set(contexts);
+        this.activeContextState.set(restored);
+      })();
+      this.contextRefresh = pending;
+      const clearPending = () => {
+        if (this.contextRefresh === pending) this.contextRefresh = undefined;
+      };
+      void pending.then(clearPending, clearPending);
     }
-    if (activateSingleContext && contexts.length === 1) {
-      await this.switchContext(contexts[0].scopeId);
+    await this.contextRefresh;
+    if (version !== this.identityVersion) return;
+    if (activateSingleContext && !this.activeContextState() && this.contextsState().length === 1) {
+      await this.switchContext(this.contextsState()[0].scopeId);
     }
   }
 }

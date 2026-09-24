@@ -2,6 +2,7 @@ import { getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
+import { defineString } from 'firebase-functions/params';
 
 /** Determina el proyecto desde el entorno administrado o la configuración local. */
 const projectId =
@@ -10,14 +11,21 @@ const projectId =
   process.env.GOOGLE_CLOUD_PROJECT ??
   process.env.FIREBASE_PROJECT_ID;
 
-const databaseId = process.env.FIREBASE_FIRESTORE_DATABASE;
+const configuredDatabaseId =
+  process.env.FIRESTORE_DATABASE_ID ?? process.env.FIREBASE_FIRESTORE_DATABASE;
+const isFunctionsDiscovery = process.env.FUNCTIONS_CONTROL_API === 'true';
+const firestoreDatabaseId = defineString('FIRESTORE_DATABASE_ID');
 
 if (!projectId) {
   throw new Error('Falta FIREBASE_PROJECT_ID fuera del entorno administrado de Google Cloud.');
 }
-if (!databaseId) {
-  throw new Error('Falta FIREBASE_FIRESTORE_DATABASE para seleccionar la base Firestore.');
+if (!configuredDatabaseId && !isFunctionsDiscovery) {
+  throw new Error('Falta FIRESTORE_DATABASE_ID para seleccionar la base Firestore.');
 }
+
+// Firebase CLI discovers exported functions in an isolated process before it
+// loads the project's .env file. No database calls run during discovery.
+const databaseId = configuredDatabaseId ?? '(default)';
 
 // Logging para debugging (desactivado en producción)
 const isDebug = false;
@@ -29,12 +37,14 @@ if (isDebug) {
       GCP_PROJECT: process.env.GCP_PROJECT,
       GCLOUD_PROJECT: process.env.GCLOUD_PROJECT,
       FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
-      FIREBASE_FIRESTORE_DATABASE: process.env.FIREBASE_FIRESTORE_DATABASE,
+      FIRESTORE_DATABASE_ID: process.env.FIRESTORE_DATABASE_ID,
     },
   });
 }
 
-const app = getApps()[0] ?? initializeApp({
+const app =
+  getApps()[0] ??
+  initializeApp({
     projectId,
     storageBucket: `${projectId}.firebasestorage.app`,
   });
@@ -52,4 +62,14 @@ if (isDebug) {
   console.log('[Firebase Admin] Firestore configurado con database:', databaseId);
 }
 
-export { app, firestore, auth, storage, databaseId, projectId, FieldValue, Timestamp };
+export {
+  app,
+  firestore,
+  auth,
+  storage,
+  databaseId,
+  firestoreDatabaseId,
+  projectId,
+  FieldValue,
+  Timestamp,
+};

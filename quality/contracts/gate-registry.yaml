@@ -9,8 +9,8 @@ gates:
     profileMembership: [frontend-local, full]
     prerequisites: []
     producer: juez-portable#executeGate
-    fingerprintInputs: { roots: [cisus-angular/src, cisus-angular/public, cisus-angular/package.json], scope: null }
-    expectedEvidenceSchema: judge.run-manifest/v2
+    fingerprintInputs: { roots: [cisus-angular/src, cisus-angular/public, cisus-angular/package.json, cisus-angular/package-lock.json, cisus-angular/angular.json, cisus-angular/tsconfig.json, cisus-angular/tsconfig.app.json], scope: null }
+    expectedEvidenceSchema: judge.portable-run/v1
     timeoutMs: 300000
     retry: { maxAttempts: 1, retryOn: [] }
     environment: { mode: any, capabilities: [] }
@@ -24,8 +24,8 @@ gates:
     profileMembership: [frontend-local, full]
     prerequisites: []
     producer: juez-portable#executeGate
-    fingerprintInputs: { roots: [cisus-angular/src], scope: null }
-    expectedEvidenceSchema: judge.run-manifest/v2
+    fingerprintInputs: { roots: [cisus-angular/src, cisus-angular/package.json, cisus-angular/package-lock.json, cisus-angular/angular.json, cisus-angular/tsconfig.json, cisus-angular/tsconfig.spec.json, cisus-angular/vitest.config.ts], scope: null }
+    expectedEvidenceSchema: judge.portable-run/v1
     timeoutMs: 300000
     retry: { maxAttempts: 1, retryOn: [] }
     environment: { mode: any, capabilities: [] }
@@ -39,8 +39,8 @@ gates:
     profileMembership: [functions-local, security, full]
     prerequisites: []
     producer: juez-portable#executeGate
-    fingerprintInputs: { roots: [functions/src, functions/package.json], scope: null }
-    expectedEvidenceSchema: judge.run-manifest/v2
+    fingerprintInputs: { roots: [functions/src, functions/package.json, functions/package-lock.json, functions/tsconfig.json, shared], scope: null }
+    expectedEvidenceSchema: judge.portable-run/v1
     timeoutMs: 300000
     retry: { maxAttempts: 1, retryOn: [] }
     environment: { mode: any, capabilities: [] }
@@ -55,9 +55,9 @@ gates:
     prerequisites: []
     producer: scripts/check-multitenant-security.cjs
     fingerprintInputs:
-      roots: [functions/src, cisus-angular/src/app/core, cisus-angular/public/runtime-config.js, firestore.rules, storage.rules, firebase.json]
+      roots: [functions/src, cisus-angular/src/app/core, cisus-angular/public/runtime-config.example.js, firestore.rules, storage.rules, firebase.example.json, scripts/check-multitenant-security.cjs, scripts/bootstrap-cisus.cjs]
       scope: null
-    expectedEvidenceSchema: judge.run-manifest/v2
+    expectedEvidenceSchema: judge.portable-run/v1
     timeoutMs: 30000
     retry: { maxAttempts: 1, retryOn: [] }
     environment: { mode: any, capabilities: [] }

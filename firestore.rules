@@ -67,6 +67,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Rutas versionadas de las imágenes del carrusel de proceso.
+    match /public_site_content/process {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // El resto de Firestore es backend-owned. El catálogo y toda operación tenant
     // pasan por Cloud Functions con App Check y autorización granular.
     match /{document=**} {

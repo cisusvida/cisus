@@ -5,6 +5,11 @@ import type {
   CompanyWorkspace,
   AccessContractSummary,
   InventoryItem,
+  PublicMediaKind,
+  MediaAnimationConfiguration,
+  MediaAnimationLayerKey,
+  ProductCustomization,
+  RelatedImageSource,
   PromotionSummary,
   SaleSummary,
 } from '../models/commerce';
@@ -124,12 +129,43 @@ export class CommerceGateway {
   }
 
   uploadPublicMedia(data: {
-    kind: 'home' | 'product';
+    kind: PublicMediaKind;
     targetId: string;
     fileBase64: string;
     mimeType: 'image/jpeg' | 'image/png' | 'image/webp';
+    quality?: 82 | 76 | 68;
   }): Promise<{ media: { path: string; url: string; expiresAt: number; generation: string } }> {
     return this.call('uploadPublicMedia', data);
+  }
+
+  downloadPublicMedia(data: {
+    kind: PublicMediaKind;
+    targetId: string;
+  }): Promise<{ base64: string; filename: string; mimeType: string }> {
+    return this.call('downloadPublicMedia', data);
+  }
+
+  configurePublicMedia(data: {
+    kind: PublicMediaKind;
+    targetId: string;
+    animation: 'none' | 'appear' | 'disappear';
+    animationLayerKeys: MediaAnimationLayerKey[];
+  }): Promise<MediaAnimationConfiguration> {
+    return this.call('configurePublicMedia', data);
+  }
+
+  configureProductCustomization(data: {
+    targetId: string;
+    customization: ProductCustomization;
+  }): Promise<{ customization: ProductCustomization }> {
+    return this.call('configurePublicMedia', { ...data, kind: 'product_customization' });
+  }
+
+  configureRelatedImageSource(data: {
+    targetId: string;
+    relatedImageSource: RelatedImageSource;
+  }): Promise<{ relatedImageSource: RelatedImageSource }> {
+    return this.call('configurePublicMedia', { ...data, kind: 'product' });
   }
 
   async listPromotions(): Promise<PromotionSummary[]> {

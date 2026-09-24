@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ROLE_POLICIES = exports.CISUS_ENTITLEMENTS = exports.CISUS_PERMISSIONS = void 0;
+exports.PLATFORM_INTERNAL_ROLES = exports.ROLE_POLICIES = exports.CISUS_ENTITLEMENTS = exports.CISUS_PERMISSIONS = void 0;
+exports.canAssignRole = canAssignRole;
 exports.isCisusRole = isCisusRole;
 exports.CISUS_PERMISSIONS = [
     'companies.read',
@@ -13,6 +14,7 @@ exports.CISUS_PERMISSIONS = [
     'subscriptions.manage',
     'catalog.read',
     'catalog.manage',
+    'public_media.manage',
     'pricing.read',
     'pricing.manage',
     'pricing.override',
@@ -60,6 +62,7 @@ exports.ROLE_POLICIES = {
             'subscriptions.read',
             'subscriptions.manage',
             'catalog.manage',
+            'public_media.manage',
             'pricing.manage',
             'pricing.override',
             'promotions.manage',
@@ -73,12 +76,21 @@ exports.ROLE_POLICIES = {
         permissions: [
             ...operationalRead,
             'catalog.manage',
+            'public_media.manage',
             'inventory.receive',
             'inventory.adjust',
             'inventory.transfer',
             'sales.void',
             'sales.refund',
             'audit.read',
+        ],
+        seatRequired: true,
+    },
+    cisus_designer: {
+        permissions: [
+            'companies.read',
+            'catalog.read',
+            'public_media.manage',
         ],
         seatRequired: true,
     },
@@ -161,6 +173,15 @@ exports.ROLE_POLICIES = {
         seatRequired: true,
     },
 };
+exports.PLATFORM_INTERNAL_ROLES = new Set([
+    'cisus_commercial_admin',
+    'cisus_operations',
+    'cisus_designer',
+]);
 function isCisusRole(value) {
     return typeof value === 'string' && value in exports.ROLE_POLICIES;
+}
+function canAssignRole(actorRole, targetRole) {
+    if (!isCisusRole(targetRole) || targetRole === 'platform_admin') return false;
+    return !exports.PLATFORM_INTERNAL_ROLES.has(targetRole) || actorRole === 'platform_admin';
 }

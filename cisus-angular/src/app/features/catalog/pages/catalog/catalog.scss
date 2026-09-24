@@ -179,25 +179,25 @@
 .empty p {
   color: #727a72;
 }
-.modal-backdrop {
-  position: fixed;
-  z-index: 250;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 20px;
+.modal::backdrop {
   background: rgba(13, 17, 14, 0.78);
   backdrop-filter: blur(8px);
 }
 .modal {
-  position: relative;
-  display: grid;
-  width: min(980px, 100%);
+  position: fixed;
+  margin: auto;
+  padding: 0;
+  border: 0;
+  color: var(--ink);
+  width: min(680px, calc(100% - 40px));
   max-height: calc(100svh - 40px);
-  overflow: auto;
-  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
   border-radius: 25px;
   background: var(--paper);
+}
+.modal-scroll {
+  max-height: inherit;
+  overflow-y: auto;
 }
 .modal-image {
   position: relative;
@@ -251,21 +251,6 @@
 .quote strong {
   margin: 3px 0 6px;
   font: 700 1.7rem 'Manrope';
-}
-.close {
-  position: absolute;
-  z-index: 2;
-  top: 14px;
-  right: 14px;
-  display: grid;
-  width: 39px;
-  height: 39px;
-  place-items: center;
-  border: 0;
-  border-radius: 50%;
-  background: #fff;
-  font-size: 1.4rem;
-  cursor: pointer;
 }
 @media (max-width: 900px) {
   .tools {

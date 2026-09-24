@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1672" height="941" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid slice">
+  <title>Fondo Cisus: luz ámbar sobre carbón</title>
+  <defs>
+    <linearGradient id="charcoal" x1="0%" y1="0%" x2="85%" y2="100%">
+      <stop stop-color="#211e1a"/>
+      <stop offset=".38" stop-color="#121412"/>
+      <stop offset="1" stop-color="#080b0a"/>
+    </linearGradient>
+    <radialGradient id="amber-light">
+      <stop stop-color="#ffd39a" stop-opacity=".66"/>
+      <stop offset=".14" stop-color="#ecaa63" stop-opacity=".4"/>
+      <stop offset=".36" stop-color="#c77535" stop-opacity=".19"/>
+      <stop offset=".65" stop-color="#9a5429" stop-opacity=".065"/>
+      <stop offset="1" stop-color="#9a5429" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="warm-haze">
+      <stop stop-color="#b98654" stop-opacity=".15"/>
+      <stop offset=".35" stop-color="#ae7849" stop-opacity=".085"/>
+      <stop offset=".7" stop-color="#97633b" stop-opacity=".025"/>
+      <stop offset="1" stop-color="#97633b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sun-ray">
+      <stop stop-color="#f6ce98" stop-opacity=".23"/>
+      <stop offset=".22" stop-color="#e8b77f" stop-opacity=".16"/>
+      <stop offset=".48" stop-color="#d49a60" stop-opacity=".08"/>
+      <stop offset=".74" stop-color="#bb8049" stop-opacity=".025"/>
+      <stop offset="1" stop-color="#bb8049" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="edge-reflection">
+      <stop stop-color="#e98537" stop-opacity=".16"/>
+      <stop offset=".3" stop-color="#c06b2e" stop-opacity=".09"/>
+      <stop offset=".65" stop-color="#8c4e28" stop-opacity=".028"/>
+      <stop offset="1" stop-color="#8c4e28" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="soft-shadow">
+      <stop stop-color="#060908" stop-opacity=".65"/>
+      <stop offset=".5" stop-color="#060908" stop-opacity=".42"/>
+      <stop offset=".8" stop-color="#060908" stop-opacity=".13"/>
+      <stop offset="1" stop-color="#060908" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Base continua; los degradados sustituyen fotos, filtros y texturas. -->
+  <path fill="url(#charcoal)" d="M0 0h1672v941H0z"/>
+
+  <!-- Luz lateral amplia y caída suave, sin objetos reconocibles. -->
+  <ellipse fill="url(#amber-light)" cx="64" cy="-38" rx="740" ry="528"/>
+  <ellipse fill="url(#warm-haze)" cx="409" cy="121" rx="629" ry="153" transform="rotate(31 409 121)"/>
+  <ellipse fill="url(#warm-haze)" cx="709" cy="170" rx="692" ry="187" transform="rotate(34 709 170)" opacity=".47"/>
+
+  <!-- Rayos en abanico desde arriba a la izquierda; bordes y extremos suaves. -->
+  <g fill="url(#sun-ray)">
+    <ellipse cx="567" cy="122" rx="870" ry="74" transform="rotate(22 567 122)" opacity=".5"/>
+    <ellipse cx="491" cy="177" rx="791" ry="62" transform="rotate(29 491 177)" opacity=".75"/>
+    <ellipse cx="462" cy="230" rx="814" ry="90" transform="rotate(35 462 230)" opacity=".58"/>
+    <ellipse cx="377" cy="273" rx="733" ry="55" transform="rotate(43 377 273)" opacity=".6"/>
+    <ellipse cx="272" cy="289" rx="643" ry="81" transform="rotate(52 272 289)" opacity=".35"/>
+  </g>
+
+  <!-- Reflejos periféricos para acompañar el PNG de madera. -->
+  <ellipse fill="url(#edge-reflection)" cx="1660" cy="568" rx="383" ry="592" opacity=".7"/>
+  <ellipse fill="url(#edge-reflection)" cx="1152" cy="1025" rx="709" ry="247" opacity=".62"/>
+  <ellipse fill="url(#warm-haze)" cx="-127" cy="855" rx="494" ry="227" opacity=".5"/>
+
+  <!-- Centro de bajo contraste para textos y producto. -->
+  <ellipse fill="url(#soft-shadow)" cx="681" cy="531" rx="837" ry="392"/>
+</svg>

@@ -33,7 +33,7 @@ npm start
 
 `npm start` inicia únicamente Angular en `http://localhost:4200`, conectado directamente al proyecto productivo configurado localmente: Auth, Firestore, Storage y Functions desplegadas. `npm run dev` queda como alias equivalente. El proyecto no usa emuladores. El entorno de desarrollo y las Functions usan Node.js 22.
 
-Los identificadores reales no se versionan. Copia `.firebaserc.example`, `firebase.example.json` y `cisus-angular/public/runtime-config.example.js` a sus nombres sin `.example`, y completa los valores solo en tu equipo o en el sistema de despliegue. Define además `FIREBASE_PROJECT_ID` y `FIREBASE_FIRESTORE_DATABASE` para Functions y el bootstrap.
+Los identificadores reales no se versionan. Copia `.firebaserc.example`, `firebase.example.json` y `cisus-angular/public/runtime-config.example.js` a sus nombres sin `.example`, y completa los valores solo en tu equipo o en el sistema de despliegue. Functions usa `FIRESTORE_DATABASE_ID`; el bootstrap acepta además `FIREBASE_PROJECT_ID` para seleccionar el proyecto.
 
 Este modo puede modificar datos reales. Usa cuentas y datos de prueba controlados cuando trabajes desde localhost.
 
@@ -43,7 +43,7 @@ Este modo puede modificar datos reales. Usa cuentas y datos de prueba controlado
 npm run verify
 ```
 
-Ejecuta build y pruebas Angular, build/pruebas de Functions y el contrato estático multiempresa. El Juez no inicia emuladores ni toca producción; usa huellas por área para evitar repetir gates no afectados.
+Ejecuta build y pruebas Angular, build/pruebas de Functions y el contrato estático multiempresa. Invoca el motor Juez externo y guarda evidencia en `.juez/latest-run.json`. No inicia emuladores ni toca producción. Para ejecutar solo un área, consultar [perfiles y configuración](quality/README.md).
 
 ## Base inicial
 
@@ -51,7 +51,7 @@ El bootstrap no contiene usuarios ni credenciales. Requiere Application Default 
 
 ```powershell
 $env:FIREBASE_PROJECT_ID = 'ID_PROYECTO_LOCAL'
-$env:FIREBASE_FIRESTORE_DATABASE = 'ID_BASE_LOCAL'
+$env:FIRESTORE_DATABASE_ID = 'ID_BASE_LOCAL'
 $env:CISUS_BOOTSTRAP_ADMIN_UID = 'UID_REAL'
 npm run bootstrap
 ```
@@ -66,8 +66,22 @@ Firestore, despliega esta versión y comprueba que las métricas de App Check re
 verificadas. El desarrollo local se conecta directamente a los servicios desplegados y usa la misma
 configuración pública de App Check.
 
-Las imágenes administrables no se hacen públicas en Storage: `uploadPublicMedia` las normaliza a
-WebP y `getPublicMediaUrls` entrega URLs temporales a visitantes anónimos con App Check válido.
+Cuando reCAPTCHA no puede emitir la atestación dentro de un navegador de desarrollo, registrar un
+UUID4 en App Check → Tokens de depuración y definir esta variable antes de cargar Angular en el
+`runtime-config.js` local:
+
+```js
+globalThis.FIREBASE_APPCHECK_DEBUG_TOKEN = 'UUID4_REGISTRADO';
+```
+
+Ese archivo está ignorado por Git. El token permite el desarrollo local y debe tratarse como una
+credencial; producción continúa usando reCAPTCHA Enterprise.
+
+Las imágenes administrables de portada, proceso y productos no son assets del frontend:
+`uploadPublicMedia` las normaliza a WebP y `getPublicMediaUrls` entrega una URL pública revocable a
+visitantes con App Check válido. El rol `cisus_designer` puede actualizarlas desde el panel sin recibir
+permisos operacionales de catálogo, inventario o ventas. El contrato y el atajo operativo están en
+[`docs/architecture/CISUS_PUBLIC_MEDIA.md`](docs/architecture/CISUS_PUBLIC_MEDIA.md).
 
 ```bash
 npm run deploy

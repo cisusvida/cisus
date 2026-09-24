@@ -47,7 +47,8 @@
           can('access_contracts.manage') ||
           can('pricing.manage') ||
           can('promotions.manage') ||
-          can('catalog.manage'))
+          can('catalog.manage') ||
+          can('public_media.manage'))
       ) {
         <button
           type="button"
@@ -212,7 +213,7 @@
         }
         @case ('administration') {
           <section class="admin-grid">
-            @if (can('catalog.manage')) {
+            @if (can('public_media.manage')) {
               <section class="panel operation-form" aria-labelledby="public-media-title">
                 <p class="eyebrow">Medios protegidos</p>
                 <h2 id="public-media-title">Imágenes públicas</h2>
@@ -225,6 +226,46 @@
                     (change)="uploadMedia($event, 'home', 'hero')"
                 /></label>
                 <label
+                  >Grabado animado de la portada<input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    [disabled]="mediaUploading()"
+                    (change)="uploadMedia($event, 'home', 'hero_carving')"
+                /></label>
+                <label
+                  >Fondo de productos en Home<input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    [disabled]="mediaUploading()"
+                    (change)="uploadMedia($event, 'home', 'portfolio_background')"
+                /></label>
+                <fieldset class="media-group">
+                  <legend>Ideas del proceso</legend>
+                  <p>
+                    Cada idea tiene sus siete etapas. Portavasos mantiene sus imágenes ya
+                    publicadas; carga Tablas aquí cuando estén listas.
+                  </p>
+                  @for (idea of processIdeas; track idea.id) {
+                    <fieldset class="media-group media-group--idea">
+                      <legend>{{ idea.label }}</legend>
+                      <div class="media-input-grid">
+                        @for (step of processSteps; track step.id) {
+                          <label
+                            >{{ step.number }} · {{ step.title
+                            }}<input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              [disabled]="mediaUploading()"
+                              (change)="
+                                uploadMedia($event, 'process', processMediaTarget(idea.id, step.id))
+                              "
+                          /></label>
+                        }
+                      </div>
+                    </fieldset>
+                  }
+                </fieldset>
+                <label
                   >Producto<select [value]="mediaProductId()" (change)="updateMediaProduct($event)">
                     <option value="">Selecciona</option>
                     @for (product of catalog(); track product.id) {
@@ -233,11 +274,18 @@
                   </select></label
                 >
                 <label
-                  >Imagen del producto<input
+                  >Foto de catálogo<input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     [disabled]="mediaUploading() || !mediaProductId()"
                     (change)="uploadMedia($event, 'product', mediaProductId())"
+                /></label>
+                <label
+                  >Imagen transparente para Home<input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    [disabled]="mediaUploading() || !mediaProductId()"
+                    (change)="uploadMedia($event, 'product_scene', mediaProductId())"
                 /></label>
                 @if (mediaUploading()) {
                   <p aria-live="polite">Procesando y publicando imagen…</p>
@@ -273,6 +321,9 @@
                 >
                 <label
                   >Rol<select [formField]="accessForm.jobRoleId">
+                    @if (auth.activeContext()?.jobRoleId === 'platform_admin') {
+                      <option value="cisus_designer">Diseñador Cisus</option>
+                    }
                     <option value="company_admin">Administrador empresa</option>
                     <option value="branch_manager">Jefe sucursal</option>
                     <option value="sales_associate">Ventas</option>

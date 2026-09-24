@@ -1,8 +1,18 @@
 import { Routes } from '@angular/router';
+import { isDevMode } from '@angular/core';
 import { authGuard } from './core/guards/auth-guard';
 import { contextGuard } from './core/guards/context-guard';
 
 export const routes: Routes = [
+  {
+    path: 'productos-preview',
+    title: 'Demostración local de Productos — Cisus',
+    canMatch: [() => isDevMode()],
+    loadComponent: () =>
+      import('./features/home/pages/products-preview/products-preview').then(
+        (m) => m.ProductsPreview,
+      ),
+  },
   {
     path: '',
     title: 'Cisus — Productos y empresas asociadas',
@@ -28,6 +38,24 @@ export const routes: Routes = [
     title: 'Mi cuenta — Cisus',
     canActivate: [authGuard],
     loadComponent: () => import('./features/account/pages/account/account').then((m) => m.Account),
+  },
+  {
+    path: 'mis-proyectos/:projectId',
+    title: 'Proyecto — Cisus',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/client-projects/pages/client-projects/client-projects').then(
+        (m) => m.ClientProjects,
+      ),
+  },
+  {
+    path: 'mis-proyectos',
+    title: 'Mis proyectos — Cisus',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/client-projects/pages/client-projects/client-projects').then(
+        (m) => m.ClientProjects,
+      ),
   },
   {
     path: 'dashboard',

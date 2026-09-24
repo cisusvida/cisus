@@ -1,89 +1,527 @@
-<section id="portfolio" aria-labelledby="portfolio-title">
-  <div class="container portfolio-head">
-    <div>
-      <p class="eyebrow">Líneas seleccionadas</p>
-      <h2 id="portfolio-title" class="section-title">
-        Productos que acompañan<br />buenos <em>momentos.</em>
-      </h2>
-    </div>
-    <div class="head-side">
-      <p class="section-copy">
-        Diseño Cisus, fabricación trazable y disponibilidad administrada por cada empresa asociada.
-      </p>
-      <a routerLink="/catalogo">Ver todo el catálogo <span aria-hidden="true">→</span></a>
-    </div>
-  </div>
-  <div class="container portfolio-grid">
-    @for (item of items(); track item.id; let index = $index) {
-      <button
-        type="button"
-        class="project"
-        [class.project--wide]="index === 0"
-        (click)="open(item, $event)"
-        [attr.aria-label]="'Ver detalles de ' + item.title"
+<section
+  id="portfolio"
+  aria-labelledby="portfolio-section-title"
+  [attr.aria-busy]="selectionBusy()"
+  [attr.data-family]="family()?.id"
+>
+  <svg
+    class="scene-background"
+    viewBox="0 0 1672 1072"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <defs>
+      <linearGradient id="portfolio-olive-field" x1="0" y1="0" x2="1" y2=".18">
+        <stop stop-color="#303b27" />
+        <stop offset=".2" stop-color="#464329" />
+        <stop offset=".43" stop-color="#353720" />
+        <stop offset=".7" stop-color="#222719" />
+        <stop offset="1" stop-color="#252b1b" />
+      </linearGradient>
+      <linearGradient
+        id="portfolio-ochre-beam"
+        gradientUnits="userSpaceOnUse"
+        x1="235"
+        y1="0"
+        x2="150"
+        y2="510"
       >
-        <img
-          [ngSrc]="item.cover"
-          fill
-          [priority]="index === 0"
-          sizes="(max-width: 760px) 100vw, 55vw"
-          [alt]="item.title"
-        />
-        <span class="project-shade"></span>
-        <span class="project-number">0{{ index + 1 }}</span>
-        <span class="project-content"
-          ><small>{{ item.category }}</small
-          ><strong>{{ item.title }}</strong
-          ><span>{{ item.summary }}</span></span
-        >
-        <span class="project-arrow" aria-hidden="true">↗</span>
-      </button>
-    }
-  </div>
-</section>
-@if (selected(); as item) {
-  <div class="modal-backdrop" role="presentation" (click)="close()">
-    <section
-      class="modal"
-      role="dialog"
-      aria-modal="true"
-      [attr.aria-labelledby]="'modal-' + item.id"
-      (click)="$event.stopPropagation()"
+        <stop stop-color="#94723a" stop-opacity=".64" />
+        <stop offset=".24" stop-color="#83703a" stop-opacity=".5" />
+        <stop offset=".57" stop-color="#616033" stop-opacity=".27" />
+        <stop offset="1" stop-color="#485130" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient
+        id="portfolio-olive-reflection"
+        gradientUnits="userSpaceOnUse"
+        x1="160"
+        y1="60"
+        x2="490"
+        y2="375"
+      >
+        <stop stop-color="#686839" stop-opacity=".27" />
+        <stop offset=".48" stop-color="#515b31" stop-opacity=".14" />
+        <stop offset="1" stop-color="#35452a" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient
+        id="portfolio-amber-reflection"
+        gradientUnits="userSpaceOnUse"
+        x1="630"
+        y1="-30"
+        x2="700"
+        y2="185"
+      >
+        <stop stop-color="#886332" stop-opacity=".56" />
+        <stop offset=".4" stop-color="#66512a" stop-opacity=".3" />
+        <stop offset="1" stop-color="#514829" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient id="portfolio-atmosphere-fade" x1="0" y1="0" x2="0" y2="1">
+        <stop stop-color="white" stop-opacity="0" />
+        <stop offset=".04" stop-color="white" stop-opacity=".02" />
+        <stop offset=".1" stop-color="white" stop-opacity=".16" />
+        <stop offset=".18" stop-color="white" stop-opacity=".55" />
+        <stop offset=".28" stop-color="white" />
+        <stop offset=".36" stop-color="white" stop-opacity=".76" />
+        <stop offset=".48" stop-color="white" stop-opacity=".39" />
+        <stop offset=".62" stop-color="white" stop-opacity=".12" />
+        <stop offset=".76" stop-color="white" stop-opacity=".015" />
+        <stop offset=".84" stop-color="white" stop-opacity="0" />
+      </linearGradient>
+      <mask
+        id="portfolio-atmosphere-mask"
+        maskUnits="userSpaceOnUse"
+        x="0"
+        y="0"
+        width="930"
+        height="817"
+      >
+        <path fill="url(#portfolio-atmosphere-fade)" d="M0 0h930v817H0z" />
+      </mask>
+      <filter
+        id="portfolio-soft-light"
+        x="-25%"
+        y="-25%"
+        width="150%"
+        height="150%"
+        color-interpolation-filters="sRGB"
+      >
+        <feGaussianBlur stdDeviation="24" />
+      </filter>
+      <filter
+        id="portfolio-fine-grain"
+        x="0"
+        y="0"
+        width="100%"
+        height="100%"
+        color-interpolation-filters="sRGB"
+      >
+        <feTurbulence type="fractalNoise" baseFrequency=".78" numOctaves="1" seed="12" />
+        <feColorMatrix type="saturate" values="0" />
+      </filter>
+    </defs>
+    <path fill="#071a13" d="M0 0h1672v1072H0z" />
+    <svg
+      class="scene-olive-atmosphere"
+      viewBox="0 0 930 817"
+      preserveAspectRatio="none"
+      focusable="false"
     >
-      <button
-        #modalClose
-        type="button"
-        class="modal-close"
-        aria-label="Cerrar detalle"
-        (click)="close()"
-      >
-        ×
-      </button>
-      <div class="modal-image">
-        <img [ngSrc]="item.cover" fill sizes="(max-width: 700px) 100vw, 50vw" [alt]="item.title" />
-      </div>
-      <div class="modal-copy">
-        <p class="eyebrow">{{ item.category }}</p>
-        <h3 [id]="'modal-' + item.id">{{ item.title }}</h3>
-        <p>{{ item.description }}</p>
-        <div class="chips">
-          @for (tag of item.tags; track tag) {
-            <span class="chip">{{ tag }}</span>
-          }
-        </div>
-        <h4>Incluye</h4>
-        <ul>
-          @for (deliverable of item.deliverables; track deliverable) {
-            <li>{{ deliverable }}</li>
-          }
-        </ul>
-        <div class="modal-price">
-          <span>Desde</span><strong>{{ price(item.price) }}</strong>
-        </div>
-        <a class="button button--orange" routerLink="/catalogo" (click)="close()"
-          >Ver producto en catálogo</a
+      <g mask="url(#portfolio-atmosphere-mask)">
+        <path fill="url(#portfolio-olive-field)" d="M0 0h930v817H0z" />
+        <g filter="url(#portfolio-soft-light)">
+          <path
+            fill="url(#portfolio-ochre-beam)"
+            d="M142-100C165 6 125 86 101 185S55 357 111 475L256 536C211 372 218 271 253 147S311-24 327-100Z"
+          />
+          <path
+            fill="url(#portfolio-olive-reflection)"
+            d="M-100 99C95-37 279-16 440 63L675 190C443 111 335 197 144 267L-100 346Z"
+          />
+          <path
+            fill="url(#portfolio-amber-reflection)"
+            d="M539-75C623-55 687-13 735 44L819 178C735 139 696 97 624 71L538 41Z"
+          />
+          <path
+            fill="#111b13"
+            opacity=".24"
+            d="M376-90C398 91 403 154 496 252S674 359 747 526L899 565C795 329 681 254 586 147S492-38 485-90Z"
+          />
+          <path
+            fill="url(#portfolio-olive-reflection)"
+            opacity=".6"
+            d="M842 109C864 181 834 250 856 337L970 467L1020 259C950 229 931 145 931 83Z"
+          />
+        </g>
+        <path
+          fill="#808080"
+          filter="url(#portfolio-fine-grain)"
+          opacity=".022"
+          d="M0 0h930v817H0z"
+        />
+      </g>
+    </svg>
+  </svg>
+  @if (loading()) {
+    <div class="portfolio-state" role="status">Preparando la colección…</div>
+  } @else if (error()) {
+    <div class="portfolio-state">
+      <p role="alert">{{ error() }}</p>
+      <button class="retry-button" type="button" (click)="load()">Reintentar</button>
+    </div>
+  } @else if (active(); as item) {
+    <div class="portfolio-layout">
+      <app-hero-media-editor
+        class="product-media-editor"
+        [entries]="editorLayers()"
+        [scopeKey]="item.id"
+        [sectionLabel]="'Producto · ' + item.name"
+        [allowLayers]="true"
+        [animation]="item.sceneAnimation ?? 'none'"
+        [animationLayerKeys]="item.sceneAnimationLayerKeys ?? []"
+        [customization]="item.customization ?? { enabled: false, label: '' }"
+        [relatedImage]="relatedImageSettings()"
+        (published)="mediaPublished($event)"
+        (animationChanged)="animationChanged($event)"
+        (replayRequested)="replayAnimation()"
+        (customizationChanged)="customizationChanged($event)"
+        (relatedImageChanged)="relatedImageChanged($event)"
+      />
+      <header class="section-intro">
+        <h2 id="portfolio-section-title">Explora nuestras colecciones</h2>
+        <p>Elige una colección y descubre sus diseños.</p>
+      </header>
+      <header class="product-navigation">
+        <h3 #familyHeading id="portfolio-family-title" class="family-title" tabindex="-1">
+          {{ family()?.label }}
+        </h3>
+        <div
+          #typeSwitcher
+          class="type-switcher"
+          role="group"
+          [attr.aria-label]="'Tipos de ' + family()?.label"
         >
+          @for (typeOption of types(); track typeOption.id; let index = $index) {
+            <button
+              type="button"
+              class="type-option"
+              [class.type-option--overflow]="index >= visibleTypeCount()"
+              [attr.aria-pressed]="type()?.id === typeOption.id"
+              (click)="selectType(typeOption.id)"
+            >
+              @switch (typeOption.icon) {
+                @case ('paw') {
+                  <svg class="type-icon paw-icon" viewBox="0 0 48 48" aria-hidden="true">
+                    <ellipse cx="24" cy="30" rx="10" ry="8" />
+                    <ellipse cx="11" cy="22" rx="4" ry="6" />
+                    <ellipse cx="19" cy="13" rx="4" ry="6" />
+                    <ellipse cx="29" cy="13" rx="4" ry="6" />
+                    <ellipse cx="37" cy="22" rx="4" ry="6" />
+                  </svg>
+                }
+                @case ('relief') {
+                  <svg class="type-icon relief-icon" viewBox="0 0 48 48" aria-hidden="true">
+                    <circle cx="24" cy="24" r="20" />
+                    <circle cx="24" cy="24" r="14" />
+                    <circle cx="24" cy="24" r="8" />
+                  </svg>
+                }
+                @case ('knob') {
+                  <svg class="type-icon line-icon" viewBox="0 0 48 48" aria-hidden="true">
+                    <circle cx="24" cy="22" r="13" />
+                    <path d="M18 35h12M20 31h8" />
+                  </svg>
+                }
+                @case ('handle') {
+                  <svg class="type-icon line-icon" viewBox="0 0 48 48" aria-hidden="true">
+                    <path d="M10 30c7-16 21-16 28 0M13 30v5M35 30v5" />
+                  </svg>
+                }
+              }
+              <span>{{ typeOption.label }}</span>
+            </button>
+          }
+          @if (overflowTypes().length) {
+            <details #moreTypes class="more-types">
+              <summary
+                aria-label="Más tipos de productos"
+                [class.has-selection]="visibleTypeCount() <= types().indexOf(type()!)"
+              >
+                <span aria-hidden="true">•••</span>
+              </summary>
+              <div class="type-overflow-list" role="group" aria-label="Otros tipos">
+                @for (option of overflowTypes(); track option.id) {
+                  <button
+                    type="button"
+                    [attr.aria-pressed]="type()?.id === option.id"
+                    (click)="selectOverflowType(option.id)"
+                  >
+                    {{ option.label }}
+                  </button>
+                }
+              </div>
+            </details>
+          }
+        </div>
+      </header>
+      <div class="scene-stage" [attr.data-product]="item.id" [attr.data-family]="family()?.id">
+        <p class="scene-claim">{{ familyClaim() }}</p>
+        @if (previousSelection(); as previous) {
+          @if (previous.sceneUrl; as previousScene) {
+            <img
+              class="scene-layer scene-layer--previous"
+              [src]="previousScene"
+              alt=""
+              [attr.data-product]="previous.product.id"
+              [attr.data-fit]="previous.product.portfolio.sceneObjectFit ?? 'contain'"
+              [style.object-fit]="previous.product.portfolio.sceneObjectFit ?? 'contain'"
+              [style.object-position]="previous.product.portfolio.sceneObjectPosition ?? '50% 50%'"
+            />
+          }
+        }
+        @if (activeSceneUrl(); as scene) {
+          <img
+            class="scene-layer scene-layer--current"
+            [class.layer-appear]="
+              replayEnabled() && item.sceneAnimation === 'appear' && animatedLayer('product_scene')
+            "
+            [class.layer-disappear]="
+              replayEnabled() && item.sceneAnimation === 'disappear' && animatedLayer('product_scene')
+            "
+            [src]="scene"
+            alt=""
+            [attr.data-product]="item.id"
+            [attr.data-fit]="activeSceneFit()"
+            [style.object-fit]="activeSceneFit()"
+            [style.object-position]="activeScenePosition()"
+            (error)="sceneFailed(scene)"
+          />
+        } @else {
+          <div class="scene-error" role="status">
+            <p>No pudimos cargar esta visualización.</p>
+            <button type="button" (click)="retryActiveScene()">Reintentar imagen</button>
+          </div>
+        }
+        @for (layer of item.sceneLayers ?? []; track layer.kind + layer.url) {
+          @if (layer.url; as overlay) {
+            <img
+              class="scene-layer scene-overlay"
+              [src]="overlay"
+              alt=""
+              [attr.data-product]="item.id"
+              [class.layer-appear]="
+                replayEnabled() && animatedLayer(layer.kind) && item.sceneAnimation === 'appear'
+              "
+              [class.layer-disappear]="
+                replayEnabled() && animatedLayer(layer.kind) && item.sceneAnimation === 'disappear'
+              "
+            />
+          }
+        }
+        @if (customizationAvailable() && customizationActive()) {
+          <img
+            class="scene-layer customization-overlay"
+            [src]="item.customizationImageUrl"
+            [alt]="item.name + ' con ' + item.customization?.label"
+            [attr.data-product]="item.id"
+            (error)="customizationFailed(item.customizationImageUrl!)"
+          />
+        }
       </div>
-    </section>
-  </div>
-}
+      <article class="product-info">
+        <div class="product-heading">
+          <h4 id="portfolio-title">{{ item.name }}</h4>
+          <div class="product-actions">
+            <button
+              type="button"
+              class="detail-link"
+              (click)="openDetails(item, $event)"
+              [attr.aria-label]="'Ver detalles de ' + item.name"
+            >
+              Ver detalles <span aria-hidden="true">→</span>
+            </button>
+            @if (customizationAvailable()) {
+              <button
+                type="button"
+                class="customization-toggle"
+                [class.is-active]="customizationActive()"
+                [attr.aria-pressed]="customizationActive()"
+                [attr.aria-label]="
+                  (customizationActive() ? 'Quitar ' : 'Agregar ') + item.customization?.label
+                "
+                (click)="toggleCustomization()"
+              >
+                <span
+                  class="customization-symbol"
+                  [class.is-active]="customizationActive()"
+                  aria-hidden="true"
+                >
+                  @if (customizationActive()) {
+                    ✓
+                  } @else {
+                    <span class="customization-plus"></span>
+                  }
+                </span>
+                <span class="customization-label">{{ customizationButtonLabel() }}</span>
+              </button>
+            }
+          </div>
+        </div>
+        @if (conceptFamily()) {
+          <div class="concept-status" aria-label="Estado del modelo">
+            <span>{{ family()?.conceptLabel }}</span>
+            <span>{{ family()?.imageDisclosure }}</span>
+          </div>
+        }
+        <p class="product-meta">{{ activeMetadata() }}</p>
+        <p class="product-description">{{ activeDescription() }}</p>
+      </article>
+      <div class="model-switcher" [attr.aria-label]="'Modelos de ' + type()?.label">
+        @for (model of models(); track model.id) {
+          <button
+            type="button"
+            [attr.aria-label]="'Mostrar ' + model.name"
+            [attr.aria-pressed]="item.id === model.id"
+            [attr.data-model-id]="model.id"
+            (click)="selectModel(model)"
+            (keydown)="modelKey($event, model)"
+          >
+            <span class="model-thumb">
+              @if (thumbnailUrl(model); as modelImage) {
+                <img
+                  [src]="modelImage"
+                  alt=""
+                  aria-hidden="true"
+                  (error)="imageFailed(modelImage)"
+                />
+              } @else {
+                <span class="model-placeholder">Imagen no disponible</span>
+              }
+            </span>
+            <span class="model-name">{{ model.name }}</span>
+          </button>
+        }
+      </div>
+      <aside class="related-products" aria-labelledby="related-title">
+        <div class="related-header">
+          <div>
+            <h3 id="related-title">Otras colecciones</h3>
+            <p>Cambia de familia o explora una ficha individual.</p>
+          </div>
+        </div>
+        @if (relatedItems().length) {
+          <div
+            #relatedViewport
+            class="related-viewport"
+            role="region"
+            aria-label="Explorar otras colecciones y piezas"
+            tabindex="0"
+            (scroll)="onRelatedScroll($event)"
+            (keydown)="relatedKey($event)"
+            (pointerdown)="startRelatedDrag($event)"
+            (pointermove)="moveRelatedDrag($event)"
+            (pointerup)="endRelatedDrag($event)"
+            (pointercancel)="endRelatedDrag($event)"
+            (dragstart)="$event.preventDefault()"
+          >
+            <div class="related-track">
+              @for (related of relatedItems(); track related.id) {
+                @if (related.kind === 'family') {
+                  <button
+                    type="button"
+                    class="related-card related-card--family"
+                    (click)="selectRelatedFamily(related.family.id)"
+                    [attr.aria-label]="'Mostrar la colección ' + related.family.label"
+                  >
+                    @if (editorialImageUrl(related.representative); as familyImage) {
+                      <img
+                        [src]="familyImage"
+                        alt=""
+                        aria-hidden="true"
+                        draggable="false"
+                        (error)="imageFailed(familyImage)"
+                      />
+                    } @else {
+                      <span class="related-image-missing">Imagen no disponible</span>
+                    }
+                    <span class="related-card-shade" aria-hidden="true"></span>
+                    <span class="related-card-copy">
+                      <span class="related-card-kicker">Colección</span>
+                      <strong>{{ related.family.label }}</strong>
+                      <span class="related-card-description">{{ related.family.claim }}</span>
+                    </span>
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="related-card related-card--product"
+                    (click)="openRelated(related.product, $event)"
+                    [attr.aria-label]="'Ver ficha individual de ' + related.product.name"
+                  >
+                    @if (editorialImageUrl(related.product); as productImage) {
+                      <img
+                        [src]="productImage"
+                        [alt]="related.product.name"
+                        draggable="false"
+                        (error)="imageFailed(productImage)"
+                      />
+                    } @else {
+                      <span class="related-image-missing">Imagen no disponible</span>
+                    }
+                    <span class="related-card-shade" aria-hidden="true"></span>
+                    <span class="related-card-copy">
+                      <span class="related-card-kicker">Ficha individual</span>
+                      <strong>{{ related.product.name }}</strong>
+                      <span class="related-card-description">{{
+                        companionDescription(related.product)
+                      }}</span>
+                    </span>
+                  </button>
+                }
+              }
+            </div>
+          </div>
+        } @else {
+          <p class="related-empty">No hay otras colecciones disponibles por ahora.</p>
+        }
+        @if (relatedPageCount() > 1) {
+          <div class="related-dots" aria-label="Páginas de otras colecciones y piezas">
+            @for (page of relatedPages(); track page) {
+              <button
+                type="button"
+                [attr.aria-label]="'Ir a la página ' + (page + 1)"
+                [attr.aria-pressed]="relatedPage() === page"
+                (click)="goToRelatedPage(page)"
+              >
+                <span></span>
+              </button>
+            }
+          </div>
+        }
+      </aside>
+    </div>
+    <span class="sr-only" aria-live="polite">{{ announcement() }}</span>
+  } @else {
+    <div class="portfolio-state" role="status">
+      <p>La colección estará disponible muy pronto.</p>
+      <button class="retry-button" type="button" (click)="load()">Actualizar productos</button>
+    </div>
+  }
+</section>
+
+<dialog
+  #detailsDialog
+  class="products-dialog product-dialog"
+  aria-labelledby="home-product-detail-title"
+  (cancel)="$event.preventDefault(); closeDetails()"
+>
+  <button type="button" class="dialog-close" aria-label="Cerrar detalles" (click)="closeDetails()">
+    ×
+  </button>
+  @if (detailProduct(); as product) {
+    @if (imageUrl(product); as productImage) {
+      <img class="detail-photo" [src]="productImage" [alt]="product.name" />
+    }
+    <div class="detail-copy">
+      <p class="detail-material">{{ product.materialLabel || 'Madera' }}</p>
+      <h2 id="home-product-detail-title">{{ product.name }}</h2>
+      <p>{{ product.description }}</p>
+      @if (detailIsConcept()) {
+        <p class="detail-note detail-note--concept">{{ detail()?.family?.detailNotice }}</p>
+        <a class="detail-inquiry detail-inquiry--primary" [href]="inquiryHref(product)">
+          Consultar este modelo
+        </a>
+        <p class="detail-quantity">
+          <span>¿Un proyecto con varios muebles?</span>
+          <a [href]="inquiryHref(product)">Consultar por cantidad</a>
+        </p>
+        <a class="detail-contact" href="/#contacto">Ver otra forma de contacto</a>
+      } @else {
+        <p class="detail-price">
+          <span>Precio referencial</span><strong>{{ price(product) }}</strong>
+        </p>
+        <p class="detail-note">Consulta disponibilidad y personalización con Cisus.</p>
+      }
+    </div>
+  }
+</dialog>

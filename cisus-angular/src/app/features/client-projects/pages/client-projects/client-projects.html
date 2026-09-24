@@ -1,0 +1,319 @@
+<section class="client-hero">
+  <div class="container hero-content">
+    @if (selectedProject(); as project) {
+      @if (workspace(); as workspace) {
+        <div class="project-hero__copy">
+          <p class="eyebrow">{{ project.companyName }} · {{ project.projectCode }}</p>
+          <div class="project-hero__title-row">
+            <h1 id="project-title">{{ project.title }}</h1>
+            <span class="status" [class.status--complete]="project.status === 'delivered'">
+              {{ statusLabel(project.status) }}
+            </span>
+          </div>
+          <p class="project-hero__summary">{{ project.summary }}</p>
+        </div>
+        <div class="project-hero__aside">
+          <aside class="progress-card progress-card--hero" aria-label="Avance del proyecto">
+            <div>
+              <small>Progreso respaldado</small>
+              <strong>{{ workspace.progress }}%</strong>
+            </div>
+            <div
+              class="progress-track"
+              role="progressbar"
+              aria-label="Progreso del proyecto"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-valuenow]="workspace.progress"
+            >
+              <span [style.width.%]="workspace.progress"></span>
+            </div>
+            <p>{{ workspace.completedStages }} etapas completadas · {{ project.currentStage }}</p>
+          </aside>
+          <span class="security-note">Acceso protegido por proyecto</span>
+        </div>
+      }
+    } @else {
+      <div class="client-hero__intro">
+        <p class="eyebrow">Área privada de clientes</p>
+        <h1>Mis proyectos</h1>
+        <p>Elige una compra para revisar su avance y documentación compartida.</p>
+      </div>
+      <span class="security-note">Acceso protegido por proyecto</span>
+    }
+  </div>
+</section>
+
+<main id="main-content" class="container client-content">
+  @if (loading()) {
+    <p class="state" aria-live="polite">Cargando tus proyectos…</p>
+  } @else if (error()) {
+    <p class="state state--error" role="alert">{{ error() }}</p>
+  } @else if (!projects().length) {
+    <section class="state-card card" aria-labelledby="empty-projects-title">
+      <p class="eyebrow">Sin proyectos asignados</p>
+      <h2 id="empty-projects-title">Esta cuenta no tiene proyectos compartidos.</h2>
+      <p>Si esperabas ver uno, solicita a Cisus que revise el correo asociado a tu compra.</p>
+    </section>
+  } @else if (!requestedProjectId()) {
+    <section class="project-picker" aria-labelledby="projects-title">
+      <div class="projects-intro">
+        <div>
+          <p class="eyebrow">{{ projects().length }} proyectos vinculados</p>
+          <h2 id="projects-title">Escoge un proyecto</h2>
+        </div>
+        <p>Cada espacio conserva solo la información de esa compra.</p>
+      </div>
+
+      <div class="project-selector-grid">
+        @for (project of projects(); track project.projectId) {
+          <button type="button" class="project-selector" (click)="selectProject(project)">
+            <span class="project-selector__top">
+              <span>{{ project.projectCode }}</span>
+              <span class="status" [class.status--complete]="project.status === 'delivered'">
+                {{ statusLabel(project.status) }}
+              </span>
+            </span>
+            <span class="project-selector__company">{{ project.companyName }}</span>
+            <strong>{{ project.title }}</strong>
+            <span class="project-selector__summary">{{ project.summary }}</span>
+            <span class="project-selector__footer">
+              <span>{{ project.files.length }} archivos</span>
+              <span>Ver espacio <b aria-hidden="true">→</b></span>
+            </span>
+          </button>
+        }
+      </div>
+    </section>
+  } @else if (selectedProject(); as project) {
+    @if (workspace(); as workspace) {
+      <section class="project-workspace" aria-labelledby="project-title">
+        <div class="project-switcher">
+          <button type="button" class="back-button" (click)="showProjectList()">
+            ← Mis proyectos
+          </button>
+          <div class="project-switcher__choices" aria-label="Cambiar de proyecto">
+            @for (availableProject of projects(); track availableProject.projectId) {
+              <button
+                type="button"
+                [class.is-active]="availableProject.projectId === project.projectId"
+                (click)="selectProject(availableProject)"
+              >
+                {{ availableProject.projectCode }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <nav class="workspace-tabs" aria-label="Secciones del proyecto">
+          @for (panel of panels; track panel.id) {
+            <button
+              type="button"
+              [class.is-active]="activePanel() === panel.id"
+              [attr.aria-selected]="activePanel() === panel.id"
+              (click)="selectPanel(panel.id)"
+            >
+              {{ panel.label }}
+            </button>
+          }
+        </nav>
+
+        @if (activePanel() === 'overview') {
+          <section class="overview-grid" aria-label="Resumen del proyecto">
+            <article class="overview-card overview-card--stage">
+              <p class="eyebrow">Etapa actual</p>
+              <h3>{{ project.currentStage }}</h3>
+              <p>Último respaldo: {{ formatDate(project.lastConfirmedAt) }}.</p>
+            </article>
+            <article class="overview-card">
+              <p class="eyebrow">Compra</p>
+              <strong>{{ project.quantity }} {{ project.unitLabel }}</strong>
+              <p>
+                {{ project.projectCode }} · orden respaldada {{ formatDate(project.dates.order) }}
+              </p>
+            </article>
+            <article class="overview-card">
+              <p class="eyebrow">Pago</p>
+              <strong>{{
+                formatMoney(project.financial.total, project.financial.currency)
+              }}</strong>
+              <p>
+                {{
+                  project.financial.paymentStatus === 'paid' ? 'Pago respaldado' : 'Pago pendiente'
+                }}
+                · {{ project.financial.paymentTerms }}
+              </p>
+            </article>
+            <article class="overview-card">
+              <p class="eyebrow">Archivos</p>
+              <strong>{{ project.files.length }} evidencias</strong>
+              <p>Documentos, diseños, avances y respaldos compartidos contigo.</p>
+            </article>
+          </section>
+
+          <section class="workspace-highlight card">
+            <div>
+              <p class="eyebrow">Tu recorrido</p>
+              <h3>Todo el proceso, en un solo lugar.</h3>
+              <p>
+                Revisa las etapas, las actualizaciones y los archivos de esta compra sin mezclarla
+                con otros proyectos.
+              </p>
+            </div>
+            <button type="button" class="button button--orange" (click)="selectPanel('timeline')">
+              Ver línea de tiempo
+            </button>
+          </section>
+        } @else if (activePanel() === 'timeline') {
+          <section class="timeline-panel" aria-labelledby="timeline-title">
+            <div class="panel-heading">
+              <p class="eyebrow">Proceso del proyecto</p>
+              <h3 id="timeline-title">Línea de tiempo</h3>
+              <p>
+                Las etapas se ordenan por proceso; las fechas proceden de los respaldos disponibles.
+              </p>
+            </div>
+            <div class="timeline-scroll" tabindex="0" aria-label="Línea de tiempo horizontal">
+              <ol class="horizontal-timeline">
+                @for (milestone of workspace.timeline; track milestone.id; let index = $index) {
+                  <li
+                    class="timeline-step"
+                    [class.timeline-step--current]="milestone.status === 'current'"
+                    [attr.aria-current]="milestone.status === 'current' ? 'step' : null"
+                  >
+                    <span
+                      [class]="'timeline-step__marker timeline-step__marker--' + milestone.status"
+                      aria-hidden="true"
+                    >
+                      {{ index + 1 }}
+                    </span>
+                    <article class="timeline-step__card">
+                      <div class="timeline-step__title-row">
+                        <div>
+                          <p>{{ milestone.title }}</p>
+                          <small>{{ formatDate(milestone.date) }}</small>
+                        </div>
+                        <span [class]="'milestone-status milestone-status--' + milestone.status">
+                          {{
+                            milestone.status === 'completed'
+                              ? 'Completado'
+                              : milestone.status === 'current'
+                                ? 'En curso'
+                                : 'Pendiente'
+                          }}
+                        </span>
+                      </div>
+                      <p>{{ milestone.detail }}</p>
+                      @if (milestone.files.length) {
+                        <span class="timeline-step__files"
+                          >{{ milestone.files.length }} archivo(s) asociado(s)</span
+                        >
+                      }
+                    </article>
+                  </li>
+                } @empty {
+                  <li class="timeline-step timeline-step--empty">
+                    <p>Este proyecto aún no tiene etapas publicadas.</p>
+                  </li>
+                }
+              </ol>
+            </div>
+          </section>
+        } @else if (activePanel() === 'updates') {
+          <section class="updates-panel" aria-labelledby="updates-title">
+            <div class="panel-heading">
+              <p class="eyebrow">{{ workspace.updates.length }} hechos reconstruidos</p>
+              <h3 id="updates-title">Historial documentado</h3>
+              <p>
+                Cada entrada se reconstruyó desde un archivo con fecha y se puede abrir desde aquí.
+                No corresponde a una transcripción de mensajes.
+              </p>
+            </div>
+            <div class="conversation" aria-label="Actualizaciones de seguimiento">
+              @for (update of workspace.updates; track update.id) {
+                <article
+                  class="conversation-message"
+                  [class.conversation-message--current]="update.status === 'current'"
+                >
+                  <div class="conversation-message__avatar" aria-hidden="true">C</div>
+                  <div class="conversation-message__bubble">
+                    <div>
+                      <strong>{{ update.author }}</strong>
+                      <time>{{ formatDate(update.date) }}</time>
+                    </div>
+                    <h4>{{ update.title }}</h4>
+                    <p>{{ update.message }}</p>
+                    <div class="conversation-message__source">
+                      <span>{{ update.source }}</span>
+                      <button
+                        type="button"
+                        class="conversation-message__open"
+                        [disabled]="openingFile() === update.file.fileId"
+                        [attr.aria-label]="'Abrir respaldo: ' + update.file.name"
+                        (click)="openFile(project, update.file)"
+                      >
+                        {{ openingFile() === update.file.fileId ? 'Abriendo…' : 'Ver respaldo' }}
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              } @empty {
+                <p class="state">Todavía no hay actualizaciones respaldadas para este proyecto.</p>
+              }
+            </div>
+          </section>
+        } @else {
+          <section class="files-panel" aria-labelledby="files-title">
+            <div class="panel-heading">
+              <p class="eyebrow">Documentos y evidencias</p>
+              <h3 id="files-title">Archivos compartidos</h3>
+              <p>Los enlaces se generan de forma temporal y solo para este proyecto.</p>
+            </div>
+            <div class="file-groups">
+              @for (group of workspace.fileGroups; track group.category) {
+                <section
+                  class="file-group"
+                  [attr.aria-labelledby]="project.projectId + '-' + group.category"
+                >
+                  <h4 [id]="project.projectId + '-' + group.category">{{ group.label }}</h4>
+                  <div class="file-grid">
+                    @for (file of group.files; track file.fileId) {
+                      <article class="file-card">
+                        <div class="file-mark" aria-hidden="true">{{ fileMark(file) }}</div>
+                        <div class="file-copy">
+                          <small
+                            >{{ fileSize(file.size) }} · {{ formatDate(file.documentDate) }}</small
+                          >
+                          <strong>{{ file.name }}</strong>
+                        </div>
+                        <button
+                          type="button"
+                          class="file-open"
+                          [disabled]="openingFile() === file.fileId"
+                          (click)="openFile(project, file)"
+                        >
+                          {{ openingFile() === file.fileId ? 'Abriendo…' : 'Abrir' }}
+                        </button>
+                      </article>
+                    }
+                  </div>
+                </section>
+              }
+            </div>
+          </section>
+        }
+      </section>
+    }
+  } @else {
+    <section class="state-card card" aria-labelledby="project-unavailable-title">
+      <p class="eyebrow">Proyecto no disponible</p>
+      <h2 id="project-unavailable-title">No encontramos este proyecto en tu cuenta.</h2>
+      <p>Solo se muestran las compras vinculadas al correo con que iniciaste sesión.</p>
+      <button type="button" class="button button--ghost" (click)="showProjectList()">
+        Ver mis proyectos
+      </button>
+    </section>
+  }
+</main>
+
+<app-footer />

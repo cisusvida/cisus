@@ -7,19 +7,23 @@ const { execFileSync, spawnSync } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 const functionsRoot = path.join(root, 'functions', 'src');
 const read = (relative) => fs.readFileSync(path.join(root, relative), 'utf8');
-const walk = (directory) => fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-  const absolute = path.join(directory, entry.name);
-  return entry.isDirectory() ? walk(absolute) : [absolute];
-});
+const walk = (directory) =>
+  fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const absolute = path.join(directory, entry.name);
+    return entry.isDirectory() ? walk(absolute) : [absolute];
+  });
 
 const failures = [];
 const trackedFiles = new Set(
-  execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' })
-    .split(/\r?\n/)
-    .filter(Boolean),
+  execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' }).split(/\r?\n/).filter(Boolean),
 );
-for (const localConfig of ['.firebaserc', 'firebase.json', 'cisus-angular/public/runtime-config.js']) {
-  if (trackedFiles.has(localConfig)) failures.push(`${localConfig} contiene configuración local y no debe versionarse.`);
+for (const localConfig of [
+  '.firebaserc',
+  'firebase.json',
+  'cisus-angular/public/runtime-config.js',
+]) {
+  if (trackedFiles.has(localConfig))
+    failures.push(`${localConfig} contiene configuración local y no debe versionarse.`);
 }
 
 const sensitivePatterns = [
@@ -32,27 +36,45 @@ const sensitiveScan = spawnSync('git', ['grep', '-I', '-n', '-E', sensitivePatte
   encoding: 'utf8',
 });
 if (sensitiveScan.status === 0) {
-  failures.push(`Hay credenciales o identificadores sensibles versionados:\n${sensitiveScan.stdout.trim()}`);
+  failures.push(
+    `Hay credenciales o identificadores sensibles versionados:\n${sensitiveScan.stdout.trim()}`,
+  );
 } else if (sensitiveScan.status !== 1) {
-  failures.push(`No se pudo ejecutar el escaneo de datos sensibles: ${sensitiveScan.stderr.trim()}`);
+  failures.push(
+    `No se pudo ejecutar el escaneo de datos sensibles: ${sensitiveScan.stderr.trim()}`,
+  );
 }
 
 const firebaseConfig = JSON.parse(read('firebase.example.json'));
 const database = Array.isArray(firebaseConfig.firestore)
   ? firebaseConfig.firestore.find((entry) => entry.database === 'REPLACE_FIRESTORE_DATABASE_ID')
   : undefined;
-if (database?.rules !== 'firestore.rules') failures.push('firebase.example.json no enlaza la base con sus reglas.');
-if (firebaseConfig.storage?.rules !== 'storage.rules') failures.push('Storage no enlaza sus reglas.');
+if (database?.rules !== 'firestore.rules')
+  failures.push('firebase.example.json no enlaza la base con sus reglas.');
+if (firebaseConfig.storage?.rules !== 'storage.rules')
+  failures.push('Storage no enlaza sus reglas.');
 
 const firestoreRules = read('firestore.rules');
 for (const claim of ['pv', 'sv', 'cid', 'entityId', 'jobRoleId', 'scopeId']) {
-  if (!firestoreRules.includes(`request.auth.token.${claim}`)) failures.push(`Falta validar claim ${claim}.`);
+  if (!firestoreRules.includes(`request.auth.token.${claim}`))
+    failures.push(`Falta validar claim ${claim}.`);
 }
 if (!/match \/\{document=\*\*\}[\s\S]*allow read, write: if false;/.test(firestoreRules)) {
   failures.push('Firestore no conserva cierre global backend-only.');
 }
-if (!/match \/public_site_content\/home[\s\S]*allow read: if true;[\s\S]*allow write: if false;/.test(firestoreRules)) {
+if (
+  !/match \/public_site_content\/home[\s\S]*allow read: if true;[\s\S]*allow write: if false;/.test(
+    firestoreRules,
+  )
+) {
   failures.push('Falta el read model público y de solo lectura para la portada.');
+}
+if (
+  !/match \/public_site_content\/process[\s\S]*allow read: if true;[\s\S]*allow write: if false;/.test(
+    firestoreRules,
+  )
+) {
+  failures.push('Falta el read model público y de solo lectura para el proceso.');
 }
 const storageRules = read('storage.rules');
 if (!/match \/\{allPaths=\*\*\}[\s\S]*allow read, write: if false;/.test(storageRules)) {
@@ -64,7 +86,10 @@ if (/allow read:\s*if true/.test(storageRules)) {
 
 const firebaseClient = read('cisus-angular/src/app/core/services/firebase-client.ts');
 const runtimeConfig = read('cisus-angular/public/runtime-config.example.js');
-if (!firebaseClient.includes('initializeAppCheck') || !firebaseClient.includes('ReCaptchaEnterpriseProvider')) {
+if (
+  !firebaseClient.includes('initializeAppCheck') ||
+  !firebaseClient.includes('ReCaptchaEnterpriseProvider')
+) {
   failures.push('Angular no inicializa Firebase App Check con reCAPTCHA Enterprise.');
 }
 if (!runtimeConfig.includes("firebaseAppCheckSiteKey: 'REPLACE_FIREBASE_APP_CHECK_SITE_KEY'")) {
@@ -76,11 +101,35 @@ for (const contract of [
   'enforceAppCheck:',
   'getSignedUrl',
   'public-media/home/',
+  'public-media/process/',
   'public-media/products/',
-  "permission: 'catalog.manage'",
+  "permission: 'public_media.manage'",
   'PLATFORM_MEDIA_ROLES',
 ]) {
-  if (!publicMediaFunction.includes(contract)) failures.push(`Medios públicos: falta contrato ${contract}.`);
+  if (!publicMediaFunction.includes(contract))
+    failures.push(`Medios públicos: falta contrato ${contract}.`);
+}
+const publicMediaPolicy = read('functions/src/media/public-media-policy.js');
+const publicMediaClient = read('cisus-angular/src/app/core/services/public-media-url.ts');
+const bootstrapSource = read('scripts/bootstrap-cisus.cjs');
+for (const [source, label] of [
+  [publicMediaPolicy, 'whitelist backend'],
+  [publicMediaClient, 'mapa Angular'],
+  [bootstrapSource, 'bootstrap'],
+]) {
+  if (!source.includes('resultImagePath')) {
+    failures.push(`Etapa final del proceso: falta resultImagePath en ${label}.`);
+  }
+}
+const roleCatalog = read('functions/src/security/role-catalog.js');
+for (const contract of [
+  'public_media.manage',
+  'cisus_designer',
+  'PLATFORM_INTERNAL_ROLES',
+  'canAssignRole',
+]) {
+  if (!roleCatalog.includes(contract))
+    failures.push(`Roles de medios públicos: falta contrato ${contract}.`);
 }
 
 const bootstrap = new Set([
@@ -91,6 +140,7 @@ const publicCallableFiles = new Set([
   'catalog/catalog.function.js',
   'media/public-media.function.js',
 ]);
+const clientMembershipCallableFiles = new Set(['client-projects/client-projects.function.js']);
 const callableFiles = walk(functionsRoot).filter((file) => /\.function\.(?:ts|js)$/.test(file));
 for (const file of callableFiles) {
   const relative = path.relative(functionsRoot, file).replaceAll('\\', '/');
@@ -99,13 +149,29 @@ for (const file of callableFiles) {
   if (
     !bootstrap.has(relative) &&
     !publicCallableFiles.has(relative) &&
+    !clientMembershipCallableFiles.has(relative) &&
     !source.includes('defineScopedCallable') &&
     !source.includes('resolveFreshScopedContext')
   ) {
     failures.push(`${relative}: callable tenant sin autorización de contexto estricta.`);
   }
-  if (publicCallableFiles.has(relative) && !source.includes('enforceAppCheck:')) {
+  if (
+    (publicCallableFiles.has(relative) || clientMembershipCallableFiles.has(relative)) &&
+    !source.includes('enforceAppCheck:')
+  ) {
     failures.push(`${relative}: callable público sin App Check obligatorio.`);
+  }
+  if (clientMembershipCallableFiles.has(relative)) {
+    for (const contract of [
+      'requiredUid(request)',
+      "collection('client_project_memberships')",
+      "membership?.status !== 'active'",
+      'clientMembershipId(uid, projectId)',
+    ]) {
+      if (!source.includes(contract)) {
+        failures.push(`${relative}: falta contrato de membresía ${contract}.`);
+      }
+    }
   }
   if (/console\.(?:log|info|warn|error)\([^\n]*(?:rut|phone|token)/i.test(source)) {
     failures.push(`${relative}: posible dato personal o token en logs.`);
@@ -113,7 +179,8 @@ for (const file of callableFiles) {
 }
 
 for (const forbidden of ['next.config.ts', 'src/app/layout.tsx', 'tailwind.config.ts']) {
-  if (fs.existsSync(path.join(root, forbidden))) failures.push(`Permanece artefacto heredado: ${forbidden}.`);
+  if (fs.existsSync(path.join(root, forbidden)))
+    failures.push(`Permanece artefacto heredado: ${forbidden}.`);
 }
 
 if (failures.length) {

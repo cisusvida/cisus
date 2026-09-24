@@ -1,4 +1,7 @@
 (() => {
+  // Si localhost usa Firebase desplegado con App Check exigido, registra un UUID4 como
+  // token de depuración y define FIREBASE_APPCHECK_DEBUG_TOKEN antes de este script.
+  // El token es confidencial: guárdalo solo en runtime-config.js, ignorado por Git.
   globalThis.__CISUS_RUNTIME_CONFIG__ ??= {
     firebase: {
       apiKey: 'REPLACE_FIREBASE_API_KEY',

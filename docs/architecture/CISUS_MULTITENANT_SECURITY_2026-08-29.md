@@ -20,9 +20,11 @@ Cada operación tenant valida autenticación/App Check, `pv`, `sv`, suscripción
 
 ## Medios públicos
 
-Las imágenes administrables de portada y productos viven bajo `public-media/home/{asset}/**` y `public-media/products/{productId}/**`. Storage no permite leerlas ni escribirlas directamente, incluso sin login. `getPublicMediaUrls` acepta únicamente assets de portada conocidos o productos activos y públicos, exige App Check, aplica rate limiting y entrega URLs v4 de siete días. Angular persiste cada URL por ruta y la renueva cinco minutos antes de expirar; una ruta nueva invalida naturalmente la caché anterior.
+Las imágenes administrables de portada, proceso y productos viven bajo `public-media/home/{asset}/**`, `public-media/process/{stepId}/**` y `public-media/products/{productId}/**`. Storage no permite lecturas o escrituras ordinarias desde el SDK cliente. `getPublicMediaUrls` acepta únicamente assets y etapas en listas blancas o productos activos y públicos, exige App Check y aplica rate limiting. Los objetos nuevos reciben un token de descarga revocable; los objetos legados sin token intentan una URL V4 firmada de siete días. Los read models `public_site_content/home` y `public_site_content/process` exponen solo las rutas activas. Angular persiste cada URL por ruta; una ruta nueva invalida naturalmente la caché anterior. La referencia operativa completa está en `docs/architecture/CISUS_PUBLIC_MEDIA.md`.
 
-`uploadPublicMedia` es la única vía de carga: exige contexto fresco completo, `catalog.manage` y un rol interno de Cisus, valida máximo 8 MB y formatos JPG/PNG/WebP, elimina metadatos al recodificar con Sharp, genera WebP versionado y registra auditoría. Los activos estáticos de marca continúan en Angular Hosting.
+`uploadPublicMedia` es la única vía de carga: exige contexto fresco completo de empresa, `public_media.manage` y un rol interno de Cisus, valida máximo 8 MB y formatos JPG/PNG/WebP, elimina metadatos al recodificar con Sharp, genera WebP versionado y registra auditoría. `cisus_designer` recibe únicamente lectura mínima de empresa/catálogo y administración de medios públicos; solo `platform_admin` puede asignar roles internos Cisus. Los activos estáticos de marca continúan en Angular Hosting.
+
+El carrusel de proceso termina en `result` / “Hecho realidad”, después de Distribución, para mostrar que la idea inicial se convirtió en un producto físico. Su imagen se administra mediante `resultImagePath`, igual que el resto de las etapas.
 
 App Check usa reCAPTCHA Enterprise en la app web, con los dominios autorizados de Hosting y el origen de desarrollo `localhost`. La clave pública vive en el archivo local ignorado `runtime-config.js`; los identificadores del entorno y los secretos no se almacenan en el repositorio. El frontend local usa Firebase producción de forma explícita y no activa emuladores por hostname. El enforcement de Functions y Firestore se habilita solo después de desplegar esta versión y observar solicitudes verificadas en las métricas.
 
@@ -43,7 +45,7 @@ Las suscripciones activan módulos y límites. Los roles con operación consumen
 
 ## Roles iniciales
 
-`platform_admin`, `cisus_commercial_admin`, `cisus_operations`, `company_admin`, `branch_manager`, `sales_associate`, `inventory_operator` y `finance_viewer`. Los roles son plantillas; la proyección efectiva y sus permisos son la autoridad.
+`platform_admin`, `cisus_commercial_admin`, `cisus_operations`, `cisus_designer`, `company_admin`, `branch_manager`, `sales_associate`, `inventory_operator` y `finance_viewer`. Los roles son plantillas; la proyección efectiva y sus permisos son la autoridad.
 
 ## Juez
 

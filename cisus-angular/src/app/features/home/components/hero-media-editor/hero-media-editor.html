@@ -1,0 +1,373 @@
+@if (canEdit()) {
+  <button class="editor-launch" type="button" (click)="openEditor()">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z" />
+    </svg>
+    {{ sectionLabel().startsWith('Producto · ') ? 'Editar imágenes' : 'Editar portada' }}
+  </button>
+
+  <dialog
+    #editorDialog
+    [attr.aria-labelledby]="instanceId + '-title'"
+    [attr.aria-describedby]="instanceId + '-help'"
+    (click)="backdrop($event)"
+    (cancel)="onCancel($event)"
+    (close)="resetSelection()"
+  >
+    <div class="dialog-shell">
+      <header class="editor-header">
+        <div>
+          <p class="eyebrow">{{ sectionLabel() }}</p>
+          <h2 [id]="instanceId + '-title'">{{ dialogTitle() }}</h2>
+          <p [id]="instanceId + '-help'">{{ dialogDescription() }}</p>
+        </div>
+        <button
+          type="button"
+          class="icon-button close-button"
+          aria-label="Cerrar editor"
+          [disabled]="publishing()"
+          (click)="close()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg>
+        </button>
+      </header>
+
+      <nav class="editor-tabs" aria-label="Vistas del editor">
+        <button
+          type="button"
+          [class.is-current]="view() === 'composition'"
+          [attr.aria-current]="view() === 'composition' ? 'page' : null"
+          [disabled]="archiveEditing()"
+          (click)="backToComposition()"
+        >
+          Composición
+        </button>
+        <button
+          type="button"
+          [class.is-current]="view() === 'archive'"
+          [attr.aria-current]="view() === 'archive' ? 'page' : null"
+          [disabled]="archiveEditing()"
+          (click)="openArchive()"
+        >
+          Archivo
+        </button>
+      </nav>
+
+      <div class="dialog-body" #dialogBody>
+        @if (view() === 'composition') {
+          @if (allowLayers()) {
+            <section class="composition-section" [attr.aria-labelledby]="instanceId + '-layers-title'">
+              <div class="section-intro">
+                <h3 [id]="instanceId + '-layers-title'">Capas · {{ sceneLayers().length }} de 6</h3>
+                <p>{{ canvasInstruction() }}</p>
+                <p class="layer-order-help">Las capas de arriba se muestran sobre las de abajo.</p>
+              </div>
+
+              @for (layer of compositionLayers(); track animationLayerKey(layer)) {
+                <div
+                  class="composition-row"
+                  [class.is-destination]="isAnimationDestination(layer)"
+                  [class.is-primary-destination]="primaryAnimationLayerKey() === animationLayerKey(layer)"
+                >
+                  <input
+                    class="layer-select"
+                    type="radio"
+                    [name]="instanceId + '-animation-layer'"
+                    [id]="animationLayerId(layer)"
+                    [checked]="primaryAnimationLayerKey() === animationLayerKey(layer)"
+                    [disabled]="!layer.url || busy()"
+                    [attr.aria-label]="'Esta capa recibirá la animación: ' + compositionLabel(layer)"
+                    [attr.aria-describedby]="!layer.url ? animationLayerId(layer) + '-help' : null"
+                    (change)="selectAnimationLayer(animationLayerKey(layer))"
+                  />
+                  <label class="layer-choice" [for]="animationLayerId(layer)">
+                    <span class="layer-thumb checkerboard">
+                      @if (layer.url) {
+                        <img [src]="layer.url" alt="" />
+                      } @else {
+                        <span aria-hidden="true">—</span>
+                      }
+                    </span>
+                    <span class="layer-copy">
+                      <strong>{{ compositionLabel(layer) }}</strong>
+                      <small class="layer-position">{{ compositionPosition(layer) }}</small>
+                      @if (animationRowStatus(layer); as rowStatus) {
+                        <small class="destination-status">{{ rowStatus }}</small>
+                      }
+                      @if (!layer.url) {
+                        <small [id]="animationLayerId(layer) + '-help'">Publica esta imagen para elegirla.</small>
+                      }
+                    </span>
+                  </label>
+                  <div class="row-actions">
+                    <button
+                      type="button"
+                      class="icon-button"
+                      [attr.aria-label]="'Descargar ' + compositionLabel(layer)"
+                      [title]="'Descargar ' + compositionLabel(layer)"
+                      [disabled]="!layer.url || downloading() !== null"
+                      (click)="download(layer)"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="icon-button replace-button"
+                      [attr.aria-label]="(layer.url ? 'Reemplazar imagen de ' : 'Agregar imagen a ') + compositionLabel(layer)"
+                      [title]="layer.url ? 'Reemplazar imagen' : 'Agregar imagen'"
+                      [disabled]="busy()"
+                      (click)="edit(layer)"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              }
+
+              <div class="add-layer-row">
+                <button
+                  type="button"
+                  class="secondary add-layer-button"
+                  [disabled]="busy() || !sceneLayers()[0]?.url || sceneLayers().length >= 6"
+                  (click)="addLayer()"
+                >
+                  Agregar capa
+                </button>
+                @if (sceneLayers().length >= 6) {
+                  <p>Has alcanzado las 6 capas.</p>
+                } @else if (!sceneLayers()[0]?.url) {
+                  <p>Publica primero la imagen base para agregar una capa.</p>
+                }
+              </div>
+
+              <section class="animation-settings" [attr.aria-labelledby]="instanceId + '-animation-title'">
+                <h3 [id]="instanceId + '-animation-title'">{{ animationHeading() }}</h3>
+                @if (animationState().animation === 'none') {
+                  <p>Los cambios de animación se guardan automáticamente. El destino puede quedar preparado sin activar un efecto.</p>
+                } @else {
+                  <p>Los cambios de animación se guardan automáticamente.</p>
+                }
+                <label [for]="instanceId + '-animation'">Efecto</label>
+                <select
+                  [id]="instanceId + '-animation'"
+                  [value]="animationState().animation"
+                  [disabled]="busy() || !canAnimate()"
+                  (change)="changeAnimation($event)"
+                >
+                  <option value="none">Sin animación</option>
+                  <option value="appear">Aparecer</option>
+                  <option value="disappear">Desaparecer</option>
+                </select>
+                @if (primaryAnimationLayerKey() && primaryAnimationLayerKey() !== baseAnimationKey()) {
+                  <label class="base-animation-choice">
+                    <input
+                      type="checkbox"
+                      [checked]="animateBaseWithOverlay()"
+                      [disabled]="busy() || !sceneLayers()[0]?.url"
+                      (change)="toggleAnimateBase($event)"
+                    />
+                    <span>Animar también la imagen base</span>
+                  </label>
+                }
+                <button
+                  type="button"
+                  class="secondary replay-button"
+                  [disabled]="busy() || !canAnimate() || animationState().animation === 'none'"
+                  (click)="replay()"
+                >
+                  Reproducir
+                </button>
+                @if (!hasPublishedSceneLayer()) {
+                  <p class="hint">Publica una imagen para poder elegir el destino de la animación.</p>
+                } @else if (!animationState().animationLayerKeys.length) {
+                  <p class="hint">Elige una capa publicada en la lista para configurar su animación.</p>
+                }
+              </section>
+            </section>
+          } @else {
+            <section class="archive-list">
+              <h3>Imágenes</h3>
+              @for (layer of layers(); track layer.kind + ':' + layer.targetId) {
+                <div class="archive-row">
+                  <div class="layer-thumb checkerboard">
+                    @if (layer.url) { <img [src]="layer.url" alt="" /> } @else { <span aria-hidden="true">—</span> }
+                  </div>
+                  <div class="layer-copy"><strong>{{ layer.label }}</strong><small>{{ layer.description }}</small></div>
+                  <div class="row-actions">
+                    <button type="button" class="icon-button" [attr.aria-label]="'Descargar ' + layer.label" [disabled]="!layer.url || downloading() !== null" (click)="download(layer)">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" /></svg>
+                    </button>
+                    <button type="button" class="icon-button replace-button" [attr.aria-label]="(layer.url ? 'Reemplazar imagen de ' : 'Agregar imagen a ') + layer.label" [disabled]="busy()" (click)="edit(layer)">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z" /></svg>
+                    </button>
+                  </div>
+                </div>
+              }
+            </section>
+          }
+        } @else if (!archiveEditing()) {
+          <section class="archive-list" [attr.aria-labelledby]="instanceId + '-archive-title'">
+            <h3 [id]="instanceId + '-archive-title'">Archivo de imágenes</h3>
+            @if (relatedImage()) {
+              <p class="related-image-note">
+                Marca una imagen para las tarjetas de Otras colecciones. Sin una marca se usa la escena y luego catálogo.
+              </p>
+            }
+            @for (layer of archiveLayers(); track layer.kind + ':' + layer.targetId) {
+              <div class="archive-row">
+                <div class="layer-thumb checkerboard">
+                  @if (layer.url) { <img [src]="layer.url" alt="" /> } @else { <span aria-hidden="true">—</span> }
+                </div>
+                <div class="layer-copy">
+                  <strong>{{ layer.label }}</strong>
+                  <small>{{ layer.description }}</small>
+                  @if (relatedImage() && relatedSourceFor(layer); as source) {
+                    <label class="related-image-choice">
+                      <input
+                        type="checkbox"
+                        [value]="source"
+                        [checked]="relatedImageSource() === source"
+                        [disabled]="!layer.url || busy()"
+                        [attr.aria-label]="'Usar ' + layer.label + ' en Otras colecciones'"
+                        (change)="toggleRelatedImageSource(source, $event)"
+                      />
+                      <span>Usar en Otras colecciones</span>
+                    </label>
+                  }
+                </div>
+                <div class="row-actions">
+                  <button
+                    type="button"
+                    class="icon-button"
+                    [attr.aria-label]="'Descargar ' + layer.label"
+                    [title]="'Descargar ' + layer.label"
+                    [disabled]="!layer.url || downloading() !== null"
+                    (click)="download(layer)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-button replace-button"
+                    [attr.aria-label]="(layer.url ? 'Reemplazar imagen de ' : 'Agregar imagen a ') + layer.label"
+                    [title]="layer.url ? 'Reemplazar imagen' : 'Agregar imagen'"
+                    [disabled]="busy()"
+                    (click)="edit(layer)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            } @empty {
+              <p>No hay imágenes adicionales para administrar.</p>
+            }
+          </section>
+        } @else if (selected(); as layer) {
+          <section class="file-editor" [attr.aria-labelledby]="instanceId + '-file-title'">
+            <button type="button" class="text-button back-button" (click)="returnFromFile()">
+              Volver a {{ returnView === 'composition' ? 'composición' : 'archivo' }}
+            </button>
+            <h3 [id]="instanceId + '-file-title'">{{ layer.url ? 'Reemplazar imagen' : 'Agregar imagen' }} · {{ layer.label }}</h3>
+            @if (editingCustomization()) {
+              <fieldset class="customization-settings" [disabled]="busy()">
+                <legend>Botón de personalización</legend>
+                <label class="customization-check">
+                  <input type="checkbox" [checked]="customizationEnabled()" (change)="changeCustomizationEnabled($event)" />
+                  Mostrar este botón en el producto
+                </label>
+                <label [for]="instanceId + '-customization-label'">Nombre de la personalización</label>
+                <input
+                  [id]="instanceId + '-customization-label'"
+                  type="text"
+                  maxlength="40"
+                  placeholder="Canaleta"
+                  [value]="customizationLabel()"
+                  (input)="changeCustomizationLabel($event)"
+                />
+                <p class="hint">Botón: Agregar {{ customizationLabel().trim() || 'personalización' }}. Al pulsarlo queda activado y muestra esta imagen sobre el producto; al pulsarlo de nuevo la oculta.</p>
+                <p class="hint">Usa PNG o WebP transparente con el mismo lienzo y encuadre que la imagen base.</p>
+              </fieldset>
+            }
+            <p class="hint">{{ recommendation(layer) }}</p>
+            <div class="preview-grid">
+              <figure>
+                <figcaption>Imagen publicada</figcaption>
+                <div class="image-preview checkerboard">
+                  @if (layer.url) { <img [src]="layer.url" alt="Capa actualmente publicada" /> } @else { <span>Sin imagen publicada</span> }
+                </div>
+              </figure>
+              <figure>
+                <figcaption>Nuevo archivo · antes de optimizar</figcaption>
+                <div class="image-preview checkerboard">
+                  @if (candidate(); as image) { <img [src]="image.dataUrl" alt="Nueva imagen seleccionada" /> } @else { <span>Selecciona una imagen</span> }
+                </div>
+              </figure>
+            </div>
+            <label class="file-label" [for]="instanceId + '-file'">Seleccionar nueva imagen</label>
+            <input
+              [id]="instanceId + '-file'"
+              type="file"
+              accept="image/png,image/webp,image/jpeg"
+              [attr.aria-describedby]="instanceId + '-file-help'"
+              [disabled]="busy()"
+              (change)="chooseFile($event)"
+            />
+            <p [id]="instanceId + '-file-help'" class="hint">
+              PNG, WebP o JPG · Hasta 8 MB. WebP hasta 1920 px para escenas y portada; 1200 px para Proceso y miniaturas. Se conserva la transparencia del archivo.
+            </p>
+            @if (layer.targetId === 'hero_carving') {
+              <p class="hint">Para el grabado, usa PNG o WebP con fondo transparente y las mismas proporciones y posición que la imagen base. JPG no tiene transparencia.</p>
+            }
+            @if (candidate(); as image) {
+              <p class="file-info">{{ image.file.name }} · {{ image.width }} × {{ image.height }} px</p>
+            }
+            <fieldset [disabled]="busy()">
+              <legend>Calidad de WebP</legend>
+              @for (option of qualities; track option.value) {
+                <label class="quality-option" [class.is-selected]="quality() === option.value">
+                  <input
+                    type="radio"
+                    [name]="instanceId + '-quality'"
+                    [value]="option.value"
+                    [checked]="quality() === option.value"
+                    (change)="quality.set(option.value)"
+                  />
+                  <span><strong>{{ option.label }}</strong><small>{{ option.description }}</small></span>
+                </label>
+              }
+            </fieldset>
+            <p class="hint">Las tres opciones conservan el canal de transparencia. El peso final depende de la imagen.</p>
+            @if (error()) { <p class="editor-error" role="alert">{{ error() }}</p> }
+            <p class="editor-status" role="status">{{ uploading() ? 'Guardando cambios…' : reading() ? 'Leyendo imagen…' : '' }}</p>
+          </section>
+        }
+      </div>
+
+      <footer class="editor-footer">
+        @if (view() === 'archive' && archiveEditing()) {
+          <button type="button" class="secondary" [disabled]="publishing()" (click)="returnFromFile()">Cancelar</button>
+          <button
+            type="button"
+            class="primary"
+            [disabled]="!canPublish() || busy()"
+            (click)="publish()"
+          >
+            {{ uploading() ? 'Guardando…' : editingCustomization() ? 'Guardar personalización' : 'Publicar imagen' }}
+          </button>
+        } @else {
+          <p class="tools-status" role="status">{{ downloading() ? 'Preparando descarga…' : notice() }}</p>
+          <span class="autosave-note">Los cambios de animación se guardan automáticamente.</span>
+          <button type="button" class="secondary" (click)="close()">Cerrar</button>
+        }
+      </footer>
+    </div>
+  </dialog>
+}

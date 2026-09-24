@@ -11,14 +11,13 @@ import {
   signal,
 } from '@angular/core';
 import type { ProcessIdeaIllustration } from '../../../../core/models/process-step';
-import { nearestIdeaTurn, orbitPosition, wrapIdeaIndex } from './idea-orbit.geometry';
+import { nearestIdeaTurn, orbitWindow, wrapIdeaIndex } from './idea-orbit.geometry';
 import { ProcessIdeaIcon } from './process-idea-icon';
 
 export interface IdeaOrbitOption {
   id: string;
   label: string;
   illustration: ProcessIdeaIllustration;
-  status?: 'realized' | 'developing';
 }
 
 /** Owns idea navigation only. Selecting an idea never changes the process stage. */
@@ -49,11 +48,10 @@ export class ProcessIdeaOrbit {
     nearestIdeaTurn(this.selectedIndex(), this.turn(), this.ideas().length),
   );
   protected readonly items = computed(() =>
-    this.ideas().map((idea, index) => {
-      const position = nearestIdeaTurn(index, this.cursor(), this.ideas().length);
-      const relative = position - this.cursor();
-      return { idea, position, relative, ...orbitPosition(relative) };
-    }),
+    orbitWindow(this.cursor(), this.ideas().length).map((slot) => ({
+      ...slot,
+      idea: this.ideas()[slot.index],
+    })),
   );
   private pointerStart: { x: number; y: number; id: number; horizontal: boolean } | null = null;
   private suppressClick = false;
@@ -64,8 +62,10 @@ export class ProcessIdeaOrbit {
     this.turn.set(position);
     this.selection.emit(this.ideas()[wrapIdeaIndex(position, this.ideas().length)].id);
   }
-  protected clickIdea(position: number): void {
-    if (!this.suppressClick) this.choose(position);
+  protected clickIdea(event: MouseEvent, position: number): void {
+    const suppressPointerClick = this.suppressClick && event.detail > 0;
+    this.suppressClick = false;
+    if (!suppressPointerClick) this.choose(position);
   }
   protected move(direction: number): void {
     this.choose(this.cursor() + direction);
@@ -82,7 +82,13 @@ export class ProcessIdeaOrbit {
       this.move(directions[event.key]);
     } else if (event.key === 'Home' || event.key === 'End') {
       event.preventDefault();
-      this.choose(event.key === 'Home' ? 0 : this.ideas().length - 1);
+      this.choose(
+        nearestIdeaTurn(
+          event.key === 'Home' ? 0 : this.ideas().length - 1,
+          this.cursor(),
+          this.ideas().length,
+        ),
+      );
     } else {
       return;
     }
@@ -109,12 +115,14 @@ export class ProcessIdeaOrbit {
     if (allowed) this.move(Math.sign(delta));
   }
   protected onPointerDown(event: PointerEvent): void {
-    if (event.button !== 0) return;
+    if (event.button !== 0 || this.ideas().length < 2) return;
     this.pointerStart = {
       x: event.clientX,
       y: event.clientY,
       id: event.pointerId,
-      horizontal: window.matchMedia?.('(max-width: 1050px)').matches ?? false,
+      horizontal:
+        event.pointerType === 'touch' ||
+        (window.matchMedia?.('(max-width: 1050px)').matches ?? false),
     };
     this.suppressClick = false;
   }

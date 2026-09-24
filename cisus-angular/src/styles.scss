@@ -162,6 +162,92 @@ h4 {
   font-size: 0.74rem;
   font-weight: 700;
 }
+/* Use on an inner modal scroller; the rounded modal shell must stay overflow: hidden. */
+.modal-scrollbar,
+.modal-scroll-indicator {
+  --modal-scrollbar-thumb: color-mix(in srgb, var(--orange) 48%, transparent);
+  --modal-scrollbar-top-inset: 14px;
+  --modal-scrollbar-bottom-inset: 14px;
+}
+.modal-scrollbar {
+  scrollbar-width: none;
+}
+.modal-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+.modal-scroll-indicator {
+  position: absolute;
+  z-index: 1;
+  top: var(--modal-scrollbar-top-inset);
+  right: 5px;
+  bottom: var(--modal-scrollbar-bottom-inset);
+  width: 5px;
+  pointer-events: none;
+}
+.modal-scroll-indicator::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: var(--modal-scrollbar-thumb-height, 0px);
+  border-radius: 999px;
+  background: var(--modal-scrollbar-thumb);
+  content: '';
+  transform: translateY(var(--modal-scrollbar-thumb-offset, 0px));
+}
+
+/* Reserve the top-right corner whenever the modal has an absolutely positioned close button. */
+.modal-scrollbar--close-clearance {
+  --modal-scrollbar-top-inset: 74px;
+}
+button.modal-dismiss {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  box-shadow: none;
+  font-size: 0;
+  line-height: 1;
+  text-shadow: 0 1px 8px rgba(13, 17, 14, 0.72);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+button.modal-dismiss::before,
+button.modal-dismiss::after {
+  position: absolute;
+  width: 12px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  content: '';
+}
+button.modal-dismiss::before {
+  transform: rotate(45deg);
+}
+button.modal-dismiss::after {
+  transform: rotate(-45deg);
+}
+button.modal-dismiss:hover {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 6px 16px rgba(13, 17, 14, 0.16);
+}
+button.modal-dismiss:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 3px;
+  box-shadow: none;
+}
 .sr-only {
   position: absolute;
   width: 1px;
@@ -228,5 +314,38 @@ h4 {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+.layer-appear {
+  animation: media-layer-appear 1.2s ease both !important;
+}
+.layer-disappear {
+  animation: media-layer-disappear 1.2s ease both !important;
+}
+@keyframes media-layer-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes media-layer-disappear {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .layer-appear {
+    animation: none !important;
+    opacity: 1;
+  }
+  .layer-disappear {
+    animation: none !important;
+    opacity: 0;
   }
 }

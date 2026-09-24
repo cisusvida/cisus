@@ -35,8 +35,15 @@
         </div>
         <div class="field">
           <div class="label-row">
-            <label for="login-password">Contraseña</label
-            ><a href="mailto:soporte@cisus.cl">¿La olvidaste?</a>
+            <label for="login-password">Contraseña</label>
+            <button
+              class="forgot"
+              type="button"
+              [disabled]="resetPending()"
+              (click)="resetPassword()"
+            >
+              {{ resetPending() ? 'Enviando…' : '¿La olvidaste?' }}
+            </button>
           </div>
           <input
             id="login-password"

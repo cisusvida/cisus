@@ -1,17 +1,22 @@
 <section id="proceso" aria-labelledby="process-title">
   <div class="container process-head">
     <div>
-      <p class="eyebrow">Cómo llega cada producto</p>
-      <h2 id="process-title" class="section-title">
-        De una idea Cisus<br />a cada <em>sucursal.</em>
-      </h2>
+      <p class="eyebrow">Así creamos contigo</p>
+      <h2 id="process-title" class="section-title">De una idea<br />a la <em>realidad.</em></h2>
     </div>
     <p class="section-copy">
-      Diseñamos, validamos y fabricamos; las empresas asociadas gestionan disponibilidad,
-      promociones y venta final.
+      Una idea para ti, tu proyecto o tu negocio. Te acompañamos desde el primer boceto hasta
+      convertirla en algo que puedas usar, regalar o compartir.
     </p>
   </div>
   <div class="process-experience">
+    <app-hero-media-editor
+      class="process-media-editor"
+      [entries]="editorEntries()"
+      [scopeKey]="activeIdeaId()"
+      [sectionLabel]="'Proceso · ' + activeIdea().label"
+      (published)="processPublished($event)"
+    />
     <app-process-idea-orbit
       class="idea-stage"
       [ideas]="ideas"
@@ -87,7 +92,8 @@
   <div class="container process-note">
     <span></span>
     <p>
-      Cisus protege la calidad del producto y cada empresa opera dentro de su acuerdo comercial.
+      Cada idea tiene su propio camino. Exploramos contigo los materiales, los detalles y las
+      posibilidades para hacerla realidad.
     </p>
   </div>
 </section>

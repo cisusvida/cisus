@@ -133,10 +133,21 @@ form {
   display: flex;
   justify-content: space-between;
 }
-.label-row a {
+.label-row a,
+.label-row .forgot {
   color: var(--orange);
   font-size: 0.77rem;
   font-weight: 700;
+}
+.label-row .forgot {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.label-row .forgot:disabled {
+  cursor: wait;
+  opacity: 0.6;
 }
 .button {
   width: 100%;

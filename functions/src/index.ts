@@ -3,7 +3,10 @@ export { getAvailableContexts } from './auth/get-available-contexts.function';
 export { getEntityAccess } from './auth/get-entity-access.function';
 
 // Access source of truth and projections
-export { manageAccessContract, listAccessContracts } from './access/manage-access-contract.function';
+export {
+  manageAccessContract,
+  listAccessContracts,
+} from './access/manage-access-contract.function';
 export { onAccessContractChange } from './access/on-access-contract-change.function';
 
 // Company, catalog and commercial agreement read models
@@ -14,7 +17,7 @@ export {
   listCompanyCatalog,
   manageCompanyProductOffer,
 } from './catalog/catalog.function';
-export { getPublicMediaUrls, uploadPublicMedia } from './media/public-media.function';
+export { getPublicMediaUrls, uploadPublicMedia, downloadPublicMedia, configurePublicMedia } from './media/public-media.function';
 
 // Customers, stock and sales
 export {
@@ -30,3 +33,9 @@ export {
 } from './inventory/inventory.function';
 export { createSale, listSales, refundSale } from './sales/sales.function';
 export { managePromotion, listPromotions } from './promotions/promotions.function';
+
+// End-customer projects. Access is membership-based and never consumes a staff seat.
+export {
+  getMyClientProjects,
+  getClientProjectFileUrl,
+} from './client-projects/client-projects.function';

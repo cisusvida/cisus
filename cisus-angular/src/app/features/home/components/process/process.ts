@@ -15,9 +15,14 @@ import { MarketingContent } from '../../../../core/services/marketing-content';
 import { PublicMediaUrlService } from '../../../../core/services/public-media-url';
 import { ProcessIdeaOrbit } from './process-idea-orbit';
 import { ProcessIdeaIcon } from './process-idea-icon';
+import {
+  PROCESS_IDEA_MEDIA_TARGETS,
+  type ProcessStepId,
+} from '../../../../core/models/process-step';
+import { HeroMediaEditor, type EditorMedia } from '../hero-media-editor/hero-media-editor';
 
 @Component({
-  imports: [NgOptimizedImage, ProcessIdeaOrbit, ProcessIdeaIcon],
+  imports: [NgOptimizedImage, ProcessIdeaOrbit, ProcessIdeaIcon, HeroMediaEditor],
   selector: 'app-process',
   styleUrl: './process.scss',
   templateUrl: './process.html',
@@ -40,6 +45,29 @@ export class Process {
     }));
   });
   protected readonly activeIndex = signal(0);
+  protected readonly editorEntries = computed<EditorMedia[]>(() =>
+    this.steps().map((step) => ({
+      kind: 'process',
+      targetId: PROCESS_IDEA_MEDIA_TARGETS[this.activeIdeaId()][step.id],
+      url: step.imageUrl,
+      label: `${step.number} · ${step.title}`,
+      description: `${this.activeIdea().label} · ${step.title}`,
+      recommendation:
+        'Recomendado vertical 3:4 · 900 × 1200 px. Mantén lo importante dentro del centro de la tarjeta.',
+    })),
+  );
+  protected processPublished(event: { targetId: string; url: string }): void {
+    for (const idea of this.ideas) {
+      const entry = Object.entries(PROCESS_IDEA_MEDIA_TARGETS[idea.id]).find(
+        ([, target]) => target === event.targetId,
+      );
+      if (entry)
+        this.processIdeaImageUrls.update((urls) => ({
+          ...urls,
+          [idea.id]: { ...urls[idea.id], [entry[0] as ProcessStepId]: event.url },
+        }));
+    }
+  }
   protected readonly hasInteracted = signal(false);
 
   private readonly destroyRef = inject(DestroyRef);

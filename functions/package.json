@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "tsc",
-    "test": "npm run build && node --test lib/security/*.spec.js lib/sales/*.spec.js lib/media/*.spec.js",
+    "test": "npm run build && node --test lib/security/*.spec.js lib/sales/*.spec.js lib/media/*.spec.js lib/client-projects/*.spec.js",
     "deploy": "npm run build && firebase deploy --only functions",
     "logs": "firebase functions:log"
   },

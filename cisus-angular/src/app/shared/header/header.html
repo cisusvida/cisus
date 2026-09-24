@@ -2,13 +2,7 @@
 <header class="site-header" [class.site-header--hero]="isHome()">
   <div class="container header-inner">
     <a routerLink="/" class="brand" aria-label="Cisus, inicio" (click)="closeMenu()">
-      <img
-        [ngSrc]="isHome() ? '/images/cisus-light.svg' : '/images/cisus.svg'"
-        width="180"
-        height="41"
-        priority
-        alt="Cisus"
-      />
+      <img ngSrc="/images/cisus-official.svg" width="180" height="44" priority alt="Cisus" />
     </a>
     <button
       class="menu-button"
@@ -32,6 +26,9 @@
       <a routerLink="/" fragment="contacto" (click)="closeMenu()">Contacto</a>
       <div class="nav-actions">
         @if (auth.user(); as user) {
+          <a routerLink="/mis-proyectos" routerLinkActive="active" (click)="closeMenu()"
+            >Mis proyectos</a
+          >
           <a routerLink="/cuenta" class="account-link" (click)="closeMenu()"
             ><span class="avatar">{{ auth.initials() }}</span
             ><span>{{ user.name }}</span></a

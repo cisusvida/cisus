@@ -26,7 +26,10 @@ class OrbitHost {
 describe('Process idea wheel', () => {
   let fixture: ComponentFixture<OrbitHost>;
   const button = (label: string) =>
-    fixture.nativeElement.querySelector(`button[aria-label="${label}"]`) as HTMLButtonElement;
+    fixture.nativeElement.querySelector(
+      `button:not(:disabled)[aria-label="${label}"]`,
+    ) as HTMLButtonElement;
+  const disc = (label: string) => button(label).querySelector('.orbit-choice__disc') as HTMLElement;
   beforeEach(async () => {
     vi.stubGlobal(
       'matchMedia',
@@ -76,7 +79,7 @@ describe('Process idea wheel', () => {
     }
     expect(fixture.componentInstance.selected()).toBe('idea-3');
     expect(document.activeElement).toBe(button('Mostrar las etapas de Idea 4'));
-    expect(button('Mostrar las etapas de Idea 1').disabled).toBe(true);
+    expect(button('Mostrar las etapas de Idea 1')).toBeNull();
   });
 
   it('keeps the keyboard focus cue on the circular icon rather than framing the whole product', async () => {
@@ -107,28 +110,34 @@ describe('Process idea wheel', () => {
     expect(fixture.nativeElement.querySelector('.orbit-choice__status')).toBeNull();
   });
 
-  it('accepts one wheel detent per gesture and leaves browser zoom alone', async () => {
+  it('accepts wheel gestures only on icons and leaves empty space and zoom to the page', async () => {
     let now = 1000;
     vi.spyOn(Date, 'now').mockImplementation(() => now);
     const dial = fixture.nativeElement.querySelector('.orbit-dial') as HTMLElement;
+    const pageScroll = new WheelEvent('wheel', { deltaY: 35, bubbles: true, cancelable: true });
+    dial.dispatchEvent(pageScroll);
+    expect(pageScroll.defaultPrevented).toBe(false);
+    expect(fixture.componentInstance.selected()).toBe('idea-0');
     for (let index = 0; index < 8; index++) {
-      dial.dispatchEvent(new WheelEvent('wheel', { deltaY: 35, cancelable: true }));
+      disc('Mostrar las etapas de Idea 1').dispatchEvent(
+        new WheelEvent('wheel', { deltaY: 35, bubbles: true, cancelable: true }),
+      );
     }
     await fixture.whenStable();
     expect(fixture.componentInstance.selected()).toBe('idea-1');
     now += 300;
-    dial.dispatchEvent(new WheelEvent('wheel', { deltaY: 35 }));
+    disc('Mostrar las etapas de Idea 2').dispatchEvent(new WheelEvent('wheel', { deltaY: 35 }));
     await fixture.whenStable();
     expect(fixture.componentInstance.selected()).toBe('idea-2');
     const zoom = new WheelEvent('wheel', { deltaY: 35, ctrlKey: true, cancelable: true });
-    dial.dispatchEvent(zoom);
+    disc('Mostrar las etapas de Idea 3').dispatchEvent(zoom);
     expect(zoom.defaultPrevented).toBe(false);
   });
 
   it('previews a drag on the arc and commits once, without the following click selecting again', async () => {
     const dial = fixture.nativeElement.querySelector('.orbit-dial') as HTMLElement;
     const pointer = (type: string, y: number) =>
-      dial.dispatchEvent(
+      (type === 'pointerdown' ? disc('Mostrar las etapas de Idea 1') : dial).dispatchEvent(
         new PointerEvent(type, {
           pointerId: 1,
           clientX: 100,
@@ -144,10 +153,80 @@ describe('Process idea wheel', () => {
     pointer('pointerup', 175);
     await fixture.whenStable();
     expect(fixture.componentInstance.selected()).toBe('idea-1');
-    button('Mostrar las etapas de Idea 1').click();
+    button('Mostrar las etapas de Idea 1').dispatchEvent(
+      new MouseEvent('click', { bubbles: true, detail: 1 }),
+    );
     await fixture.whenStable();
     expect(fixture.componentInstance.selected()).toBe('idea-1');
     expect(dial.classList.contains('orbit-dial--dragging')).toBe(false);
+  });
+
+  it('accepts keyboard activation immediately after a drag even without a pointer click', async () => {
+    const dial = fixture.nativeElement.querySelector('.orbit-dial') as HTMLElement;
+    const pointer = (type: string, y: number) =>
+      (type === 'pointerdown' ? disc('Mostrar las etapas de Idea 1') : dial).dispatchEvent(
+        new PointerEvent(type, {
+          pointerId: 1,
+          clientX: 100,
+          clientY: y,
+          button: 0,
+          bubbles: true,
+        }),
+      );
+    pointer('pointerdown', 100);
+    pointer('pointermove', 175);
+    pointer('pointerup', 175);
+    await fixture.whenStable();
+
+    button('Mostrar las etapas de Idea 1').dispatchEvent(
+      new MouseEvent('click', { bubbles: true, detail: 0 }),
+    );
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.selected()).toBe('idea-0');
+  });
+
+  it('does not start a drag in the empty dial', async () => {
+    const dial = fixture.nativeElement.querySelector('.orbit-dial') as HTMLElement;
+    for (const [type, y] of [
+      ['pointerdown', 100],
+      ['pointermove', 180],
+      ['pointerup', 180],
+    ] as const) {
+      dial.dispatchEvent(
+        new PointerEvent(type, {
+          pointerId: 1,
+          clientX: 100,
+          clientY: y,
+          button: 0,
+          bubbles: true,
+        }),
+      );
+    }
+    await fixture.whenStable();
+    expect(fixture.componentInstance.selected()).toBe('idea-0');
+    expect(dial.classList.contains('orbit-dial--dragging')).toBe(false);
+  });
+
+  it('continues past the selected slot instead of swapping two products back and forth', async () => {
+    fixture.componentInstance.ideas.update((ideas) => ideas.slice(0, 2));
+    await fixture.whenStable();
+    const outgoing = button('Mostrar las etapas de Idea 1');
+    const incoming = button('Mostrar las etapas de Idea 2');
+    incoming.click();
+    await fixture.whenStable();
+    expect(button('Mostrar las etapas de Idea 2')).toBe(incoming);
+    expect(incoming.closest('.orbit-arm')?.getAttribute('style')).toContain('180deg');
+    expect(outgoing.closest('.orbit-arm')?.getAttribute('style')).toContain('134deg');
+    expect(outgoing.disabled).toBe(true);
+    const nextOccurrence = button('Mostrar las etapas de Idea 1');
+    expect(nextOccurrence).not.toBe(outgoing);
+    expect(nextOccurrence.closest('.orbit-arm')?.getAttribute('style')).toContain('226deg');
+    nextOccurrence.click();
+    await fixture.whenStable();
+    expect(button('Mostrar las etapas de Idea 1')).toBe(nextOccurrence);
+    expect(nextOccurrence.closest('.orbit-arm')?.getAttribute('style')).toContain('180deg');
+    expect(fixture.nativeElement.querySelectorAll('button:not(:disabled)')).toHaveLength(2);
   });
 
   it('renders no redundant navigation controls when there is only one idea', async () => {

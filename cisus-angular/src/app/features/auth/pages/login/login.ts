@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, minLength, required, submit } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Auth } from '../../../../core/services/auth';
+import { ClientProjectsGateway } from '../../../../core/services/client-projects-gateway';
 import { Toast } from '../../../../core/services/toast';
 
 @Component({
@@ -12,10 +13,12 @@ import { Toast } from '../../../../core/services/toast';
 })
 export class Login {
   private readonly auth = inject(Auth);
+  private readonly clientProjects = inject(ClientProjectsGateway);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(Toast);
   protected readonly errorMessage = signal('');
+  protected readonly resetPending = signal(false);
   protected readonly model = signal({ email: '', password: '' });
   protected readonly loginForm = form(this.model, (path) => {
     required(path.email, { message: 'Ingresa tu email.' });
@@ -29,10 +32,14 @@ export class Login {
       try {
         this.errorMessage.set('');
         await this.auth.signIn(this.model().email, this.model().password);
-        this.toast.show('Bienvenido de vuelta', 'Selecciona tu empresa o sucursal para continuar.');
-        await this.router.navigateByUrl(
-          this.route.snapshot.queryParamMap.get('returnUrl') || '/cuenta',
+        const destination = await this.destinationAfterLogin();
+        this.toast.show(
+          'Bienvenido de vuelta',
+          destination === '/mis-proyectos'
+            ? 'Tus proyectos y documentos ya están disponibles.'
+            : 'Selecciona tu empresa o sucursal para continuar.',
         );
+        await this.router.navigateByUrl(destination);
       } catch {
         this.errorMessage.set('No pudimos iniciar sesión. Intenta nuevamente.');
       }
@@ -43,10 +50,49 @@ export class Login {
     try {
       this.errorMessage.set('');
       await this.auth.signInWithGoogle();
-      this.toast.show('Sesión iniciada', 'Ingresaste con tu cuenta de Google.');
-      await this.router.navigateByUrl('/cuenta');
+      const destination = await this.destinationAfterLogin();
+      this.toast.show(
+        'Sesión iniciada',
+        destination === '/mis-proyectos'
+          ? 'Tus proyectos y documentos ya están disponibles.'
+          : 'Ingresaste con tu cuenta de Google.',
+      );
+      await this.router.navigateByUrl(destination);
     } catch {
       this.errorMessage.set('No pudimos iniciar sesión con Google. Intenta nuevamente.');
     }
+  }
+
+  protected async resetPassword(): Promise<void> {
+    const accountEmail = this.model().email.trim();
+    if (!accountEmail) {
+      this.errorMessage.set('Escribe primero el correo de la cuenta que quieres recuperar.');
+      return;
+    }
+    this.resetPending.set(true);
+    this.errorMessage.set('');
+    try {
+      await this.auth.sendPasswordReset(accountEmail);
+      this.toast.show(
+        'Revisa tu correo',
+        'Si la cuenta existe, Firebase enviará un enlace para crear una nueva contraseña.',
+      );
+    } catch {
+      this.errorMessage.set('No pudimos enviar el enlace de recuperación. Intenta nuevamente.');
+    } finally {
+      this.resetPending.set(false);
+    }
+  }
+
+  private async destinationAfterLogin(): Promise<string> {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (returnUrl) return returnUrl;
+    if (this.auth.hasActiveContext() || this.auth.contexts().length > 0) return '/cuenta';
+    try {
+      if ((await this.clientProjects.listProjects()).length > 0) return '/mis-proyectos';
+    } catch {
+      // The account page remains the safe fallback if the client endpoint is unavailable.
+    }
+    return '/cuenta';
   }
 }

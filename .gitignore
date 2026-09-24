@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+/.juez/
 
 # generated application output
 /cisus-angular/dist/
@@ -41,6 +42,7 @@ yarn-error.log*
 .env*
 
 # firebase
+/.firebase/
 /.firebaserc
 /firebase.json
 /cisus-angular/public/runtime-config.js

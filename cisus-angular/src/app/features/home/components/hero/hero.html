@@ -1,28 +1,163 @@
 <section class="hero" aria-labelledby="hero-title">
-  <img
-    [ngSrc]="heroImageUrl()"
-    fill
-    priority
-    sizes="100vw"
-    alt="Tabla corporativa Cisus sobre una mesa de madera"
-  />
-  <div class="hero-overlay"></div>
-  <div class="hero-grain"></div>
-  <div class="hero-content">
-    <p class="hero-kicker"><span></span> Diseño a medida · Producción para empresas</p>
-    <h1 id="hero-title">
-      <span>Productos que crean</span>
-      <em>identidad.</em>
-    </h1>
-    <p class="hero-copy">
-      Diseñamos y fabricamos productos personalizados para empresas, cuidando los materiales, las
-      terminaciones y cada detalle que representa a tu marca.
-    </p>
-    <div class="hero-actions">
-      <a class="button button--light" href="#contacto"
-        >Cuéntanos tu idea <span aria-hidden="true">↘</span></a
-      >
-      <a class="button button--outline" routerLink="/catalogo">Explorar catálogo</a>
+  <div class="hero-stage">
+    <div class="hero-background" aria-hidden="true">
+      <svg viewBox="0 0 1672 941" preserveAspectRatio="xMinYMid slice" focusable="false">
+        <defs>
+          <linearGradient id="hero-charcoal" x1="0%" y1="0%" x2="85%" y2="100%">
+            <stop stop-color="#3a2b20" />
+            <stop offset=".38" stop-color="#24241d" />
+            <stop offset="1" stop-color="#111512" />
+          </linearGradient>
+          <radialGradient id="hero-amber-light">
+            <stop stop-color="#ffe0b5" stop-opacity=".78" />
+            <stop offset=".14" stop-color="#efb16d" stop-opacity=".5" />
+            <stop offset=".36" stop-color="#ca793c" stop-opacity=".24" />
+            <stop offset=".65" stop-color="#9a5429" stop-opacity=".065" />
+            <stop offset="1" stop-color="#9a5429" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="hero-warm-haze">
+            <stop stop-color="#c89868" stop-opacity=".22" />
+            <stop offset=".35" stop-color="#b98655" stop-opacity=".13" />
+            <stop offset=".7" stop-color="#97633b" stop-opacity=".025" />
+            <stop offset="1" stop-color="#97633b" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="hero-sun-ray">
+            <stop stop-color="#f6ce98" stop-opacity=".23" />
+            <stop offset=".22" stop-color="#e8b77f" stop-opacity=".16" />
+            <stop offset=".48" stop-color="#d49a60" stop-opacity=".08" />
+            <stop offset=".74" stop-color="#bb8049" stop-opacity=".025" />
+            <stop offset="1" stop-color="#bb8049" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="hero-edge-reflection">
+            <stop stop-color="#e98537" stop-opacity=".16" />
+            <stop offset=".3" stop-color="#c06b2e" stop-opacity=".09" />
+            <stop offset=".65" stop-color="#8c4e28" stop-opacity=".028" />
+            <stop offset="1" stop-color="#8c4e28" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="hero-soft-shadow">
+            <stop stop-color="#090b09" stop-opacity=".44" />
+            <stop offset=".5" stop-color="#090b09" stop-opacity=".27" />
+            <stop offset=".8" stop-color="#090b09" stop-opacity=".08" />
+            <stop offset="1" stop-color="#060908" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <path fill="url(#hero-charcoal)" d="M0 0h1672v941H0z" />
+        <ellipse fill="url(#hero-amber-light)" cx="64" cy="-38" rx="740" ry="528" />
+        <ellipse
+          fill="url(#hero-warm-haze)"
+          cx="409"
+          cy="121"
+          rx="629"
+          ry="153"
+          transform="rotate(31 409 121)"
+        />
+        <ellipse
+          fill="url(#hero-warm-haze)"
+          cx="709"
+          cy="170"
+          rx="692"
+          ry="187"
+          transform="rotate(34 709 170)"
+          opacity=".47"
+        />
+        <g fill="url(#hero-sun-ray)">
+          <ellipse cx="567" cy="122" rx="870" ry="74" transform="rotate(22 567 122)" opacity=".5" />
+          <ellipse
+            cx="491"
+            cy="177"
+            rx="791"
+            ry="62"
+            transform="rotate(29 491 177)"
+            opacity=".75"
+          />
+          <ellipse
+            cx="462"
+            cy="230"
+            rx="814"
+            ry="90"
+            transform="rotate(35 462 230)"
+            opacity=".58"
+          />
+          <ellipse cx="377" cy="273" rx="733" ry="55" transform="rotate(43 377 273)" opacity=".6" />
+          <ellipse
+            cx="272"
+            cy="289"
+            rx="643"
+            ry="81"
+            transform="rotate(52 272 289)"
+            opacity=".35"
+          />
+        </g>
+        <ellipse
+          fill="url(#hero-edge-reflection)"
+          cx="1660"
+          cy="568"
+          rx="383"
+          ry="592"
+          opacity=".7"
+        />
+        <ellipse
+          fill="url(#hero-edge-reflection)"
+          cx="1152"
+          cy="1025"
+          rx="709"
+          ry="247"
+          opacity=".62"
+        />
+        <ellipse fill="url(#hero-warm-haze)" cx="-127" cy="855" rx="494" ry="227" opacity=".5" />
+        <ellipse fill="url(#hero-soft-shadow)" cx="681" cy="531" rx="837" ry="392" />
+      </svg>
+    </div>
+    <div class="hero-ambient" aria-hidden="true"></div>
+    <div class="hero-collection-transition" aria-hidden="true"></div>
+    <app-hero-media-editor
+      [entries]="editorLayers()"
+      [allowLayers]="true"
+      [animation]="animation()"
+      [animationLayerKeys]="animationLayerKeys()"
+      (animationChanged)="animationChanged($event)"
+      (replayRequested)="replayAnimation()"
+      (published)="published($event)"
+    />
+    @if (composition().length) {
+      <div class="hero-media">
+        @for (
+          layer of composition();
+          track layer.targetId + layer.url;
+          let index = $index;
+          let top = $last
+        ) {
+          @if (layer.url; as imageUrl) {
+            <img
+              class="hero-media__base"
+              [src]="imageUrl"
+              [class.layer-appear]="
+                replayEnabled() && animation() === 'appear' && animationLayerKeys().includes(animationKey(layer))
+              "
+              [class.layer-disappear]="
+                replayEnabled() && animation() === 'disappear' && animationLayerKeys().includes(animationKey(layer))
+              "
+              [alt]="
+                index === 0
+                  ? 'Tabla de madera Cisus sobre una composición de piedra, tela y follaje cálido'
+                  : ''
+              "
+            />
+          }
+        }
+      </div>
+    }
+    <div class="hero-content">
+      <p class="hero-kicker"><span aria-hidden="true"></span> Diseño y fabricación propia</p>
+      <h1 id="hero-title">Piezas que merecen estar <em>a la vista.</em></h1>
+      <p class="hero-copy">
+        Diseños que combinan utilidad y carácter. Para tu espacio o para regalar.
+      </p>
+      <div class="hero-actions">
+        <a class="button hero-action hero-action--primary" routerLink="/catalogo">
+          Ver colección <span aria-hidden="true">→</span>
+        </a>
+      </div>
     </div>
   </div>
 </section>
