@@ -142,6 +142,17 @@ export class HeroMediaEditor {
         },
       ],
   );
+  protected readonly isProductEditor = computed(() =>
+    this.layers().some((layer) => layer.kind === 'product' || layer.kind.startsWith('product_')),
+  );
+  protected readonly isCoverEditor = computed(
+    () => !this.isProductEditor() && this.sectionLabel() === 'Portada',
+  );
+  protected readonly productName = computed(() =>
+    this.sectionLabel().startsWith('Producto · ')
+      ? this.sectionLabel().slice('Producto · '.length)
+      : this.layers()[0]?.targetId ?? 'producto',
+  );
   private readonly relatedImageSelection = signal<RelatedImageSource | null>(null);
   protected readonly relatedImageSource = computed(() => {
     const source = this.relatedImageSelection() ?? this.relatedImage()?.source;
@@ -161,6 +172,24 @@ export class HeroMediaEditor {
   );
   protected readonly compositionLayers = computed(() => [...this.sceneLayers()].reverse());
   protected readonly archiveLayers = computed(() => this.layers());
+  protected readonly productResourceLayers = computed(() =>
+    this.layers().filter(
+      (layer) => !this.isCompositionLayer(layer) && layer.kind !== 'product_customization',
+    ),
+  );
+  protected readonly productCustomizationLayer = computed(() =>
+    this.layers().find((layer) => layer.kind === 'product_customization') ?? null,
+  );
+  protected readonly relatedImagePreview = computed(() => {
+    const source = this.relatedImageSource();
+    if (source !== 'auto') return this.layers().find((layer) => layer.kind === source && !!layer.url) ?? null;
+    return this.layers().find((layer) => layer.kind === 'product_scene' && !!layer.url) ??
+      this.layers().find((layer) => layer.kind === 'product' && !!layer.url) ?? null;
+  });
+  protected readonly sceneAspectRatio = computed(() => {
+    const size = this.baseDimensions();
+    return size ? `${size.width} / ${size.height}` : '1600 / 989';
+  });
   protected readonly hasPublishedSceneLayer = computed(() =>
     this.sceneLayers().some((layer) => !!layer.url),
   );
@@ -202,18 +231,21 @@ export class HeroMediaEditor {
     return `${this.instanceId}-animation-${this.animationLayerKey(layer).replace(/_/g, '-')}`;
   }
   protected dialogTitle(): string {
-    const productName = this.sectionLabel().startsWith('Producto · ')
-      ? this.sectionLabel().slice('Producto · '.length)
-      : null;
-    if (this.view() === 'archive') return `Archivo · ${this.selected()?.label ?? 'imágenes'}`;
-    return productName ? `Editar imágenes de ${productName}` : 'Editar portada';
+    if (this.view() === 'archive' && this.selected())
+      return this.isProductEditor()
+        ? `${this.selected()!.label} · ${this.productName()}`
+        : `Archivo · ${this.selected()!.label}`;
+    if (this.isProductEditor()) return `Editar imágenes de ${this.productName()}`;
+    return this.isCoverEditor() ? 'Editar portada' : `Editar imágenes · ${this.sectionLabel()}`;
   }
   protected dialogDescription(): string {
-    return this.view() === 'archive'
-      ? 'Selecciona un archivo, revisa la optimización y publícalo cuando esté listo.'
-      : this.sectionLabel().startsWith('Producto · ')
-        ? 'Organiza las capas de esta escena y configura su animación.'
-        : 'Organiza las capas y configura su animación.';
+    if (this.view() === 'archive')
+      return 'Selecciona un archivo, revisa la optimización y publícalo cuando esté listo.';
+    if (this.isProductEditor())
+      return 'Gestiona la escena, las imágenes de catálogo y tarjetas y la personalización.';
+    return this.isCoverEditor()
+      ? 'Organiza las capas y configura su animación.'
+      : 'Administra las imágenes de esta sección.';
   }
   protected compositionLabel(layer: EditorMedia): string {
     if (this.isBaseLayer(layer)) return 'Imagen base';
@@ -509,6 +541,16 @@ export class HeroMediaEditor {
         animationLayerKeys: config.animationLayerKeys,
       });
       if (
+        !result ||
+        result.animation !== config.animation ||
+        !Array.isArray(result.animationLayerKeys) ||
+        result.animationLayerKeys.length !== config.animationLayerKeys.length ||
+        result.animationLayerKeys.some((key, index) => key !== config.animationLayerKeys[index])
+      )
+        throw Object.assign(new Error('Unsupported animation destination response'), {
+          code: 'functions/invalid-argument',
+        });
+      if (
         !this.destroyRef.destroyed &&
         scope === this.scopeKey() &&
         version === this.selectionVersion
@@ -518,7 +560,7 @@ export class HeroMediaEditor {
         this.notice.set('Animación guardada automáticamente.');
         return true;
       }
-    } catch {
+    } catch (error) {
       if (
         !this.destroyRef.destroyed &&
         scope === this.scopeKey() &&
@@ -528,9 +570,10 @@ export class HeroMediaEditor {
         this.animateBaseWithOverlay.set(
           previous.animationLayerKeys.length === 2 && previous.animationLayerKeys.includes(this.baseAnimationKey()),
         );
-        this.notice.set(
+        this.notice.set(mediaCallError(
+          error,
           'No se pudo guardar la animación. Revisa tu conexión y vuelve a intentarlo.',
-        );
+        ));
       }
     } finally {
       this.uploading.set(false);
@@ -560,6 +603,8 @@ export class HeroMediaEditor {
     this.selected.set(null);
     this.notice.set('');
     this.dialog()?.nativeElement.showModal();
+    const body = this.dialogBody()?.nativeElement;
+    if (body) body.scrollTop = 0;
   }
 
   protected openArchive(): void {

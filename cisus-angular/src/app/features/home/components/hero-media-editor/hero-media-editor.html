@@ -3,11 +3,12 @@
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z" />
     </svg>
-    {{ sectionLabel().startsWith('Producto · ') ? 'Editar imágenes' : 'Editar portada' }}
+    {{ isCoverEditor() ? 'Editar portada' : 'Editar imágenes' }}
   </button>
 
   <dialog
     #editorDialog
+    [class.product-dialog]="isProductEditor()"
     [attr.aria-labelledby]="instanceId + '-title'"
     [attr.aria-describedby]="instanceId + '-help'"
     (click)="backdrop($event)"
@@ -32,6 +33,7 @@
         </button>
       </header>
 
+      @if (isCoverEditor()) {
       <nav class="editor-tabs" aria-label="Vistas del editor">
         <button
           type="button"
@@ -52,16 +54,33 @@
           Archivo
         </button>
       </nav>
+      }
 
       <div class="dialog-body" #dialogBody>
         @if (view() === 'composition') {
           @if (allowLayers()) {
+            <div class="composition-workspace" [class.product-workspace]="isProductEditor()">
             <section class="composition-section" [attr.aria-labelledby]="instanceId + '-layers-title'">
               <div class="section-intro">
-                <h3 [id]="instanceId + '-layers-title'">Capas · {{ sceneLayers().length }} de 6</h3>
+                <h3 [id]="instanceId + '-layers-title'">
+                  {{ isProductEditor() ? 'Escena principal · ' + sceneLayers().length + ' de 6 capas' : 'Capas · ' + sceneLayers().length + ' de 6' }}
+                </h3>
                 <p>{{ canvasInstruction() }}</p>
                 <p class="layer-order-help">Las capas de arriba se muestran sobre las de abajo.</p>
               </div>
+
+              @if (isProductEditor()) {
+                <figure class="product-scene-preview">
+                  <div class="product-scene-canvas checkerboard" [style.aspect-ratio]="sceneAspectRatio()">
+                    @for (layer of sceneLayers(); track animationLayerKey(layer); let index = $index) {
+                      @if (layer.url) {
+                        <img [src]="layer.url" [style.z-index]="index + 1" alt="" />
+                      }
+                    }
+                  </div>
+                  <figcaption>Vista de la escena de {{ productName() }} · Las capas conservan el lienzo de la base.</figcaption>
+                </figure>
+              }
 
               @for (layer of compositionLayers(); track animationLayerKey(layer)) {
                 <div
@@ -188,6 +207,94 @@
                 }
               </section>
             </section>
+            @if (isProductEditor()) {
+              <aside class="product-assets" aria-label="Imágenes y opciones del producto">
+                <section class="product-card related-card" [attr.aria-labelledby]="instanceId + '-related-title'">
+                  <div class="product-card-heading">
+                    <span class="product-card-kicker">Tarjetas</span>
+                    <h3 [id]="instanceId + '-related-title'">Otras colecciones</h3>
+                    <p>Esta es la imagen que se muestra al recomendar este producto.</p>
+                  </div>
+                  <div class="related-current">
+                    <div class="product-asset-preview checkerboard">
+                      @if (relatedImagePreview(); as image) {
+                        <img [src]="image.url" [alt]="'Imagen actual de Otras colecciones: ' + image.label" />
+                      } @else {
+                        <span>Sin imagen publicada</span>
+                      }
+                    </div>
+                    <div>
+                      <span class="asset-meta">Imagen actual</span>
+                      <strong>{{ relatedImagePreview()?.label ?? 'Sin imagen publicada' }}</strong>
+                      <small>{{ relatedImageSource() === 'auto' ? 'Selección automática: escena y luego catálogo' : 'Selección específica' }}</small>
+                    </div>
+                  </div>
+                  @if (relatedImage()) {
+                    <fieldset class="related-source-options" [disabled]="busy()">
+                      <legend>Elegir imagen para Otras colecciones</legend>
+                      <label class="related-source-option" [class.is-selected]="relatedImageSource() === 'auto'">
+                        <input type="radio" [name]="instanceId + '-related-source'" value="auto" [checked]="relatedImageSource() === 'auto'" (change)="toggleRelatedImageSource('auto', $event)" />
+                        <span>Automática · escena o catálogo</span>
+                      </label>
+                      @for (layer of relatedImageChoices(); track layer.kind) {
+                        @if (relatedSourceFor(layer); as source) {
+                          <label class="related-source-option" [class.is-selected]="relatedImageSource() === source">
+                            <input type="radio" [name]="instanceId + '-related-source'" [value]="source" [checked]="relatedImageSource() === source" (change)="toggleRelatedImageSource(source, $event)" />
+                            <span>{{ layer.label }}</span>
+                          </label>
+                        }
+                      }
+                    </fieldset>
+                  }
+                </section>
+
+                @if (productCustomizationLayer(); as layer) {
+                  <section class="product-card customization-card" [attr.aria-labelledby]="instanceId + '-customization-title'">
+                    <div class="product-card-heading">
+                      <span class="product-card-kicker">En la ficha</span>
+                      <h3 [id]="instanceId + '-customization-title'">Personalización</h3>
+                    </div>
+                    <div class="product-asset-row product-customization-card">
+                      <div class="product-asset-preview checkerboard">
+                        @if (layer.url) { <img [src]="layer.url" [alt]="'Imagen de personalización: ' + (customization().label || 'sin nombre')" /> }
+                        @else { <span>Sin imagen</span> }
+                      </div>
+                      <div class="product-asset-details">
+                        <span class="asset-meta">Nombre del botón</span>
+                        <strong>{{ customization().label.trim() || 'Sin nombre' }}</strong>
+                        <small>{{ customization().enabled ? 'Visible en el producto' : 'Oculta en el producto' }}</small>
+                        <small>{{ layer.url ? 'Imagen publicada' : 'Falta publicar la imagen' }}</small>
+                        <button type="button" class="secondary replace-button" [disabled]="busy()" (click)="edit(layer)">Editar nombre e imagen</button>
+                      </div>
+                    </div>
+                  </section>
+                }
+
+                <section class="product-card" [attr.aria-labelledby]="instanceId + '-assets-title'">
+                  <div class="product-card-heading">
+                    <span class="product-card-kicker">Usos independientes</span>
+                    <h3 [id]="instanceId + '-assets-title'">Otras imágenes</h3>
+                  </div>
+                  @for (layer of productResourceLayers(); track layer.kind) {
+                    <div class="product-asset-row product-resource-row">
+                      <div class="product-asset-preview checkerboard">
+                        @if (layer.url) { <img [src]="layer.url" [alt]="layer.label" /> }
+                        @else { <span>Sin imagen</span> }
+                      </div>
+                      <div class="product-asset-details">
+                        <strong>{{ layer.label }}</strong>
+                        <small>{{ layer.description }}</small>
+                        <div class="product-asset-actions">
+                          <button type="button" class="text-button" [disabled]="!layer.url || downloading() !== null" (click)="download(layer)">Descargar</button>
+                          <button type="button" class="secondary replace-button" [attr.aria-label]="(layer.url ? 'Reemplazar imagen de ' : 'Agregar imagen a ') + layer.label" [disabled]="busy()" (click)="edit(layer)">{{ layer.url ? 'Reemplazar' : 'Agregar imagen' }}</button>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </section>
+              </aside>
+            }
+            </div>
           } @else {
             <section class="archive-list">
               <h3>Imágenes</h3>
@@ -212,11 +319,6 @@
         } @else if (!archiveEditing()) {
           <section class="archive-list" [attr.aria-labelledby]="instanceId + '-archive-title'">
             <h3 [id]="instanceId + '-archive-title'">Archivo de imágenes</h3>
-            @if (relatedImage()) {
-              <p class="related-image-note">
-                Marca una imagen para las tarjetas de Otras colecciones. Sin una marca se usa la escena y luego catálogo.
-              </p>
-            }
             @for (layer of archiveLayers(); track layer.kind + ':' + layer.targetId) {
               <div class="archive-row">
                 <div class="layer-thumb checkerboard">
@@ -225,19 +327,6 @@
                 <div class="layer-copy">
                   <strong>{{ layer.label }}</strong>
                   <small>{{ layer.description }}</small>
-                  @if (relatedImage() && relatedSourceFor(layer); as source) {
-                    <label class="related-image-choice">
-                      <input
-                        type="checkbox"
-                        [value]="source"
-                        [checked]="relatedImageSource() === source"
-                        [disabled]="!layer.url || busy()"
-                        [attr.aria-label]="'Usar ' + layer.label + ' en Otras colecciones'"
-                        (change)="toggleRelatedImageSource(source, $event)"
-                      />
-                      <span>Usar en Otras colecciones</span>
-                    </label>
-                  }
                 </div>
                 <div class="row-actions">
                   <button
@@ -273,7 +362,7 @@
         } @else if (selected(); as layer) {
           <section class="file-editor" [attr.aria-labelledby]="instanceId + '-file-title'">
             <button type="button" class="text-button back-button" (click)="returnFromFile()">
-              Volver a {{ returnView === 'composition' ? 'composición' : 'archivo' }}
+              Volver a {{ returnView === 'composition' ? (isProductEditor() ? 'producto' : 'composición') : 'archivo' }}
             </button>
             <h3 [id]="instanceId + '-file-title'">{{ layer.url ? 'Reemplazar imagen' : 'Agregar imagen' }} · {{ layer.label }}</h3>
             @if (editingCustomization()) {
@@ -364,7 +453,10 @@
           </button>
         } @else {
           <p class="tools-status" role="status">{{ downloading() ? 'Preparando descarga…' : notice() }}</p>
-          <span class="autosave-note">Los cambios de animación se guardan automáticamente.</span>
+          <span class="autosave-note">
+            @if (isProductEditor()) { La animación y la imagen de Otras colecciones se guardan al cambiarlas. }
+            @else if (isCoverEditor()) { Los cambios de animación se guardan automáticamente. }
+          </span>
           <button type="button" class="secondary" (click)="close()">Cerrar</button>
         }
       </footer>

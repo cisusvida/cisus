@@ -35,14 +35,19 @@ describe('HeroMediaEditor', () => {
   };
   const open = async (layer = 'Capa 2 · Grabado') => {
     if (!root().querySelector<HTMLDialogElement>('dialog')?.open) await openPanel();
+    if (layer === 'Personalización opcional' && root().querySelector('.product-customization-card')) {
+      root().querySelector<HTMLButtonElement>('.product-customization-card .replace-button')!.click();
+      await fixture.whenStable();
+      return;
+    }
     const normalized = layer === 'Capa 2 · Grabado' ? 'Superposición 1' :
       layer === 'Capa 1 · Imagen base' ? 'Imagen base' : layer;
-    let rows = [...root().querySelectorAll<HTMLElement>('.composition-row, .archive-row')];
+    let rows = [...root().querySelectorAll<HTMLElement>('.composition-row, .archive-row, .product-resource-row')];
     let row = rows.find((item) => item.textContent?.includes(normalized) || item.textContent?.includes(layer));
     if (!row && root().querySelector('.editor-tabs button:nth-child(2)')) {
       root().querySelector<HTMLButtonElement>('.editor-tabs button:nth-child(2)')!.click();
       await fixture.whenStable();
-      rows = [...root().querySelectorAll<HTMLElement>('.composition-row, .archive-row')];
+      rows = [...root().querySelectorAll<HTMLElement>('.composition-row, .archive-row, .product-resource-row')];
       row = rows.find((item) => item.textContent?.includes(normalized) || item.textContent?.includes(layer));
     }
     if (!row) throw new Error(`No se encontró la fila ${normalized}`);
@@ -513,29 +518,36 @@ describe('HeroMediaEditor', () => {
     await fixture.whenStable();
     await openPanel();
     expect(root().textContent).toContain('Referencia: lienzo de escena de 1600 × 989 px aprox.');
-    root().querySelector<HTMLButtonElement>('.editor-tabs button:nth-child(2)')!.click();
-    await fixture.whenStable();
-    expect(root().querySelectorAll('.related-image-choice')).toHaveLength(5);
+    expect(root().querySelector('.editor-tabs')).toBeNull();
+    expect(root().querySelectorAll('.related-source-option')).toHaveLength(5);
     expect(root().textContent).toContain('Imagen exclusiva');
-    expect(
-      root().querySelector<HTMLInputElement>('input[type=checkbox][value="product_related"]')
-        ?.disabled,
-    ).toBe(true);
+    expect(root().querySelector<HTMLInputElement>('input[type=radio][value="product_related"]')).toBeNull();
+    expect(root().querySelector<HTMLImageElement>('.related-current img')?.src).toContain('scene.webp');
+    expect(root().textContent).toContain('Foto de catálogo · Felino');
+    expect(root().textContent).toContain('Miniatura · Felino');
 
-    root().querySelector<HTMLInputElement>('input[type=checkbox][value="product_scene_2"]')!.click();
+    root().querySelector<HTMLInputElement>('input[type=radio][value="product_scene_2"]')!.click();
     await fixture.whenStable();
     expect(configureRelatedImage).toHaveBeenCalledWith({
       targetId: 'felino',
       relatedImageSource: 'product_scene_2',
     });
     expect(
-      root().querySelector<HTMLInputElement>('input[type=checkbox][value="product_scene_2"]')!.checked,
+      root().querySelector<HTMLInputElement>('input[type=radio][value="product_scene_2"]')!.checked,
     ).toBe(true);
+    expect(root().querySelector<HTMLImageElement>('.related-current img')?.src).toContain('layer.webp');
     expect(upload).not.toHaveBeenCalled();
   });
 
   it('lets the designer open the exclusive image row when no source has been selected', async () => {
     fixture.componentRef.setInput('entries', [
+      {
+        kind: 'product_scene',
+        targetId: 'felino',
+        url: 'https://example.com/scene.webp',
+        label: 'Capa 1 · Imagen base',
+        description: 'Felino',
+      },
       {
         kind: 'product_related',
         targetId: 'felino',
@@ -549,15 +561,11 @@ describe('HeroMediaEditor', () => {
       targetId: 'felino',
       source: 'product_thumbnail',
     });
+    fixture.componentRef.setInput('allowLayers', true);
     await fixture.whenStable();
     await openPanel();
-    root().querySelector<HTMLButtonElement>('.editor-tabs button:nth-child(2)')!.click();
-    await fixture.whenStable();
-    const exclusive = root().querySelector<HTMLInputElement>(
-      'input[type=checkbox][value="product_related"]',
-    )!;
-    expect(exclusive.checked).toBe(false);
-    expect(exclusive.disabled).toBe(true);
+    expect(root().querySelector<HTMLInputElement>('input[type=radio][value="product_related"]')).toBeNull();
+    expect(root().querySelector<HTMLInputElement>('input[type=radio][value="auto"]')?.checked).toBe(true);
     expect(button('Agregar imagen a Imagen exclusiva · Otras colecciones').disabled).toBe(false);
   });
 
@@ -572,14 +580,13 @@ describe('HeroMediaEditor', () => {
       },
     ]);
     fixture.componentRef.setInput('relatedImage', { targetId: 'felino', source: 'auto' });
+    fixture.componentRef.setInput('allowLayers', true);
     configureRelatedImage.mockRejectedValueOnce(
       Object.assign(new Error('invalid-argument'), { code: 'functions/invalid-argument' }),
     );
     await fixture.whenStable();
     await openPanel();
-    root().querySelector<HTMLButtonElement>('.editor-tabs button:nth-child(2)')!.click();
-    await fixture.whenStable();
-    root().querySelector<HTMLInputElement>('input[type=checkbox][value="product_scene"]')!.click();
+    root().querySelector<HTMLInputElement>('input[type=radio][value="product_scene"]')!.click();
     await fixture.whenStable();
     expect(root().textContent).toContain('La función de medios publicada aún no reconoce');
   });

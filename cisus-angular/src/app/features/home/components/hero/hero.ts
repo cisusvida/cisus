@@ -25,7 +25,7 @@ export class Hero {
   protected readonly replayEnabled = signal(true);
   protected animationChanged(config: MediaAnimationConfiguration): void {
     this.animation.set(config.animation);
-    this.animationLayerKeys.set(config.animationLayerKeys);
+    this.animationLayerKeys.set(Array.isArray(config.animationLayerKeys) ? config.animationLayerKeys : []);
   }
   protected readonly editorLayers = computed<EditorMedia[]>(() =>
     (this.composition().length
@@ -65,7 +65,7 @@ export class Hero {
       this.publicMedia.observeHeroComposition((layers, animation, animationLayerKeys) => {
         this.composition.set(layers);
         this.animation.set(animation);
-        this.animationLayerKeys.set(animationLayerKeys);
+        this.animationLayerKeys.set(Array.isArray(animationLayerKeys) ? animationLayerKeys : []);
       }),
     );
   }

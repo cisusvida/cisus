@@ -53,9 +53,8 @@ el editor conserva la imagen publicada para reintentar sin otra carga.
 
 ### Imagen de las tarjetas en Otras colecciones — 23 de septiembre de 2026
 
-En **Editar imágenes → Producto**, cada fila de imagen tiene un tick para elegirla como representación del producto
-en las tarjetas de **Otras colecciones**. Solo se permite una capa a la vez; sin ticks se conserva la selección
-automática (escena base → foto de catálogo). Una fila dedicada permite publicar una imagen exclusiva para las
+En **Editar imágenes** de Producto, la ficha de **Otras colecciones** muestra la imagen actual y permite elegir
+una sola fuente publicada. La opción automática usa escena base y luego foto de catálogo. Una fila dedicada permite publicar una imagen exclusiva para las
 tarjetas; la carga la selecciona en la misma escritura. `relatedImageSource` guarda `auto` o el rol administrado:
 `product_scene`, `product`, `product_thumbnail`, `product_customization`, `product_related` o una capa `product_scene_2`
 a `product_scene_6`. Los valores antiguos `scene`, `catalog` y `thumbnail` se normalizan al leerlos.
@@ -107,7 +106,7 @@ Implementación local; requiere desplegar las Functions modificadas y nuevas ant
   configuración. `prefers-reduced-motion` conserva el estado final de aparecer o desaparecer.
 - Los campos se crean en la primera publicación explícita, sin bootstrap masivo. `listPublicProducts` expone solo los nuevos campos editoriales previstos; el resolver sigue exigiendo producto activo y público.
 
-El editor contextual identifica producto o idea de Proceso y enumera sus destinos; muestra proporciones, vista previa y calidad. El editor de composición es un diálogo con las vistas **Composición** y **Archivo** y una sola zona desplazable. La composición muestra primero las superposiciones y al final la base; descargar o reemplazar una fila no cambia el destinatario de animación. El pie de composición indica que los cambios se guardan automáticamente. En **Archivo**, Cancelar descarta el archivo elegido que aún no se publicó. Escape, el botón de cierre y el fondo cierran el diálogo, salvo durante la publicación. La vista pública existente sirve como vista previa.
+El editor de **Portada** es un diálogo con vistas **Composición** y **Archivo** y una sola zona desplazable. El de **Producto** muestra en la primera vista la escena con sus capas y animación, la imagen actual y el selector de **Otras colecciones**, el nombre, estado e imagen de la personalización, y los archivos independientes de catálogo, miniatura e imagen exclusiva. Cada destino abre su propio formulario de publicación; cancelar descarta el archivo elegido que aún no se publicó. El editor contextual de Proceso enumera sus imágenes. Descargar o reemplazar una capa no cambia el destino de animación. Escape, el botón de cierre y el fondo cierran el diálogo, salvo durante la publicación.
 
 `downloadPublicMedia` entrega el WebP activo en base64 al editor autenticado, con tamaño acotado a 8 MB. No recibe una URL ni una ruta libre: resuelve tipo/target contra su documento administrado. Así la descarga no depende de un fetch del navegador a Storage. `configurePublicMedia` guarda el modo de animación y su auditoría. Ambos usan `defineScopedCallable`, `public_media.manage`, contexto fresco de empresa y roles internos, igual que la carga; no se abren reglas.
 
@@ -233,8 +232,8 @@ En la portada, el equipo Cisus con contexto de empresa y permiso `public_media.m
 El diálogo separa la composición del archivo. La lista muestra primero la capa superior y al final la base,
 con controles de destino de animación independientes de **Descargar** y **Reemplazar imagen**. Si se elige una
 superposición, se puede incluir la imagen base como segundo destino. El efecto se guarda al cambiarlo y
-**Reproducir** lo vuelve a ejecutar sin escribir de nuevo. Archivo conserva las miniaturas y destinos ajenos
-a composición, como miniatura, catálogo y Otras colecciones.
+**Reproducir** lo vuelve a ejecutar sin escribir de nuevo. Los destinos de catálogo, miniatura y Otras colecciones
+pertenecen al editor de Producto.
 
 El editor muestra el archivo original antes de optimizar y permite elegir 82, 76 o 68; la carga se publica
 solo al pulsar **Publicar imagen**. Las opciones menores comprimen más el color y pueden perder detalle;
