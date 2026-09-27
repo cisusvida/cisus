@@ -1,0 +1,46 @@
+<dialog
+  #dialog
+  class="intent-dialog"
+  [attr.aria-labelledby]="titleId"
+  (cancel)="onCancel($event)"
+>
+  <div class="dialog-content">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow">Continuar con este producto</p>
+        <h2 [id]="titleId">¿Para qué lo quieres?</h2>
+      </div>
+      <button class="close-button" type="button" aria-label="Cerrar selección" (click)="close()">
+        Cerrar
+      </button>
+    </header>
+
+    @if (context(); as product) {
+      <section class="product-summary" aria-label="Producto seleccionado">
+        <p class="product-name">{{ product.productName }}</p>
+        @if (product.optionLabels.length > 0) {
+          <p class="product-options">Opciones: {{ product.optionLabels.join(' · ') }}</p>
+        }
+        @if (product.isConcept) {
+          <p class="concept-note">Modelo en desarrollo · Su fabricación requiere evaluación.</p>
+        }
+      </section>
+    }
+
+    <div class="intent-grid">
+      @for (option of intents; track option.intent; let first = $first) {
+        <button
+          [attr.data-intent]="option.intent"
+          #firstIntent
+          [class.first-intent]="first"
+          type="button"
+          class="intent-card"
+          (click)="choose(option.intent)"
+        >
+          <span class="intent-title">{{ option.title }}</span>
+          <span class="intent-description">{{ option.description }}</span>
+        </button>
+      }
+    </div>
+  </div>
+</dialog>

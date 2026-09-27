@@ -1,0 +1,146 @@
+:host {
+  color: #f8f4ea;
+}
+
+.intent-dialog {
+  box-sizing: border-box;
+  width: min(640px, calc(100vw - 2rem));
+  max-width: 640px;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  margin: auto;
+  padding: 0;
+  border: 1px solid rgb(248 244 234 / 18%);
+  border-radius: 1.25rem;
+  background: #111512;
+  color: #f8f4ea;
+  font: inherit;
+}
+
+.intent-dialog::backdrop {
+  background: rgb(10 12 10 / 72%);
+}
+
+.dialog-content {
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: #ff8a3c;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  line-height: 1.15;
+}
+
+.close-button {
+  flex: 0 0 auto;
+  border: 1px solid rgb(248 244 234 / 38%);
+  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.product-summary {
+  margin: 1.5rem 0 1.25rem;
+  border-left: 3px solid #ff8a3c;
+  padding: 0.1rem 0 0.1rem 0.9rem;
+}
+
+.product-name,
+.product-options,
+.concept-note {
+  margin: 0;
+}
+
+.product-name {
+  font-weight: 700;
+}
+
+.product-options {
+  margin-top: 0.3rem;
+  color: rgb(248 244 234 / 78%);
+  font-size: 0.92rem;
+}
+
+.concept-note {
+  margin-top: 0.6rem;
+  color: #ffb27b;
+  font-size: 0.9rem;
+}
+
+.intent-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.intent-card {
+  display: grid;
+  gap: 0.45rem;
+  min-height: 6rem;
+  border: 1px solid rgb(248 244 234 / 22%);
+  border-radius: 0.9rem;
+  padding: 1rem;
+  background: #1b211d;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease;
+}
+
+.intent-card:hover {
+  border-color: #ff8a3c;
+  background: #242c26;
+}
+
+.intent-title {
+  color: #f8f4ea;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.intent-description {
+  color: rgb(248 244 234 / 78%);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.close-button:focus-visible,
+.intent-card:focus-visible {
+  outline: 3px solid #ff8a3c;
+  outline-offset: 3px;
+}
+
+@media (min-width: 640px) {
+  .intent-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intent-card {
+    transition: none;
+  }
+}

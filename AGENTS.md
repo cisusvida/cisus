@@ -30,6 +30,13 @@ En tareas de negocio, marca, producto, experiencia de compra, contenido o planif
 - Al esperar procesos, usar esperas de 20–60 segundos cuando proceda; evitar consultas de estado cortas y repetidas sin información nueva. No mantener procesos o revisiones adicionales por rutina.
 - Ser transparente sobre trabajo evitable: si se detectan lecturas, herramientas, verificaciones o esperas redundantes, detenerlas y comunicar brevemente qué ocurrió y cómo se corrigió. No ocultar fallos ni atribuir valor a comprobaciones innecesarias. Distinguir actividad observable de consumo interno no medido; no inventar cifras de cómputo, costes ni promesas de optimización absoluta.
 
+## Checkout principal y cierre de tareas
+
+- Trabajar directamente en `C:\Users\icard\Proyectos\Cisus`, rama `master`, por decisión de John. No crear ramas, worktrees ni copias aisladas salvo petición expresa; mantener una sola tarea de código escribiendo en este checkout a la vez.
+- Al cerrar una tarea verificada, registrar sus cambios de código y documentación en un commit local acotado. Revisar y añadir rutas explícitas, incluidos archivos nuevos; no usar `git add .` ni `git add -A` para mezclar trabajo pendiente.
+- Dejar limpio el árbol al finalizar cuando todos los cambios sean de la tarea. Si existen cambios ajenos o no atribuibles, conservarlos, informar su origen o la incertidumbre y no incorporarlos al commit propio. No descartar, ocultar con stash ni limpiar archivos para aparentar un árbol limpio.
+- Comprobar rama y estado antes de editar y después del commit. Comunicar el hash en la respuesta final; no volver a modificar la documentación solo para insertar el hash del mismo commit. Un commit local no autoriza push, despliegue ni operaciones productivas.
+
 ## Referencias según la tarea
 
 - UI de Productos: consultar la [especificación de composición e interacción](docs/plans/CISUS_PRODUCTOS_TRANSICION_Y_CAPAS_2026-09-16.md).
